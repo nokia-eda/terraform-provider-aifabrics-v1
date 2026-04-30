@@ -1,0 +1,16 @@
+Path,Method,Schema,Model Name,Supported,Datasource,Resource
+/apps/aifabrics.eda.nokia.com,GET,AppGroup,app_group,true,true,false
+/apps/aifabrics.eda.nokia.com/v1,GET,ResourceList,resource_list,true,true,false
+/apps/aifabrics.eda.nokia.com/v1/_ui/{pathname},GET,UIResult,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/backends,GET,com.nokia.eda.aifabrics.v1.BackendList,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends,DELETE,com.nokia.eda.aifabrics.v1.BackendList,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends,GET,com.nokia.eda.aifabrics.v1.BackendList,backend_list,true,true,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends,POST,com.nokia.eda.aifabrics.v1.Backend,backend,true,false,true
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/_deleted,GET,com.nokia.eda.aifabrics.v1.Backend_DeletedResources,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name},DELETE,Status,backend,true,false,true
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name},GET,com.nokia.eda.aifabrics.v1.Backend,backend,true,true,true
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name},PATCH,com.nokia.eda.aifabrics.v1.Backend,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name},PUT,com.nokia.eda.aifabrics.v1.Backend,backend,true,false,true
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}/_revs,GET,ResourceHistory,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}/_targets,GET,IntentTargets,,false,false,false
+/apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}/_topology,POST,K8STopologyRequest,,false,false,false
