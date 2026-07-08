@@ -1,0 +1,30 @@
+datasources:
+  - model_name: app_group
+    oas_endpoint: /apps/aifabrics.eda.nokia.com
+    oas_schema: AppGroup
+  - model_name: resource_list
+    oas_endpoint: /apps/aifabrics.eda.nokia.com/v1
+    oas_schema: ResourceList
+  - model_name: backend_list
+    oas_endpoint: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends
+    oas_schema: com.nokia.eda.aifabrics.v1.BackendList
+  - model_name: backend
+    oas_endpoint: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}
+    oas_schema: com.nokia.eda.aifabrics.v1.Backend
+
+resources:
+  - model_name: backend
+    oas_endpoint: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends
+    oas_schema: com.nokia.eda.aifabrics.v1.Backend
+
+qualified:
+  datasources:
+    - oas_schema: IntentTargets
+      get: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}/_targets
+    - oas_schema: ResourceHistory
+      get: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/{name}/_revs
+    - oas_schema: UIResult
+      get: /apps/aifabrics.eda.nokia.com/v1/_ui/{pathname}
+    - oas_schema: com.nokia.eda.aifabrics.v1.Backend_DeletedResources
+      get: /apps/aifabrics.eda.nokia.com/v1/namespaces/{namespace}/backends/_deleted
+  resources:
