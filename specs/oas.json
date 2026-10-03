@@ -84,9 +84,7 @@
             "type": "string"
           },
           "values": {
-            "additionalProperties": {
-              "type": "object"
-            },
+            "additionalProperties": true,
             "description": "Associated data/information.\nThe error \"message\" may contain {{name}} escapes that should be substituted with information from this dictionary.\n\nNote that this map MUST NOT contain JSON objects (`{...}`) or arrays (`[...]`), only simple JSON types are permitted.",
             "type": "object"
           }
@@ -149,6 +147,10 @@
           "x-permissive": {
             "description": "For an \"add\" operation, an already-present field referenced by the \"path\" will\nresult in an error unless this field is true.  Similarly for a non-existent\ntarget field of a \"remove\" operation.",
             "type": "boolean"
+          },
+          "x-ui-annotation": {
+            "description": "Metadata maintained in support of the EDA UI.  External use not recommended.",
+            "type": "string"
           }
         },
         "required": [
@@ -581,10 +583,16 @@
           "endpoint_a_name": {
             "type": "string"
           },
+          "endpoint_a_namespace": {
+            "type": "string"
+          },
           "endpoint_b": {
             "$ref": "#/components/schemas/TopoOverlayEndpoint"
           },
           "endpoint_b_name": {
+            "type": "string"
+          },
+          "endpoint_b_namespace": {
             "type": "string"
           },
           "group_key": {
@@ -951,6 +959,8 @@
                           "Fabric",
                           "Stripe"
                         ],
+                        "maxLength": 253,
+                        "minLength": 1,
                         "title": "Leaf Index Pool Scope",
                         "type": "string",
                         "x-eda-nokia-com": {
@@ -965,6 +975,8 @@
                           "64",
                           "96"
                         ],
+                        "maxLength": 3,
+                        "minLength": 1,
                         "title": "Prefix Length",
                         "type": "string",
                         "x-eda-nokia-com": {
@@ -1017,6 +1029,8 @@
                       "GlobalIPv6Pool",
                       "PerTenantIPv6Pool"
                     ],
+                    "maxLength": 253,
+                    "minLength": 1,
                     "title": "Type",
                     "type": "string",
                     "x-eda-nokia-com": {
@@ -1029,11 +1043,14 @@
                 "type": "object",
                 "x-eda-nokia-com": {
                   "ui-column-span": 2,
-                  "ui-order-priority": 700
+                  "ui-order-priority": 1500,
+                  "ui-presence-default": true
                 }
               },
               "asnPool": {
                 "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol.",
+                "maxLength": 253,
+                "minLength": 1,
                 "title": "Autonomous System Pool",
                 "type": "string",
                 "x-eda-nokia-com": {
@@ -1048,8 +1065,84 @@
                   ],
                   "ui-category": "UnderlayProtocol",
                   "ui-column-span": 2,
-                  "ui-order-priority": 250,
+                  "ui-order-priority": 3000,
                   "ui-single-line-group": "systemasn"
+                }
+              },
+              "dynamicLoadBalancing": {
+                "description": "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric.",
+                "properties": {
+                  "flowsetSize": {
+                    "default": 256,
+                    "description": "The number of flowset entries reserved for each aggregate ECMP group.",
+                    "enum": [
+                      256,
+                      512,
+                      1024,
+                      2048,
+                      4096,
+                      8192,
+                      16384,
+                      32768
+                    ],
+                    "format": "int64",
+                    "maximum": 32768,
+                    "minimum": 256,
+                    "title": "Flowset Size",
+                    "type": "integer",
+                    "x-eda-nokia-com": {
+                      "ui-column-span": 2,
+                      "ui-order-priority": 2000
+                    }
+                  },
+                  "inactivityTimerUs": {
+                    "default": 50,
+                    "description": "The flow inactivity timer in microseconds.",
+                    "format": "int32",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Inactivity Timer",
+                    "type": "integer",
+                    "x-eda-nokia-com": {
+                      "ui-column-span": 2,
+                      "ui-order-priority": 3000
+                    }
+                  },
+                  "mode": {
+                    "default": "Dynamic",
+                    "description": "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows.",
+                    "enum": [
+                      "Dynamic",
+                      "PerPacket"
+                    ],
+                    "maxLength": 253,
+                    "minLength": 1,
+                    "title": "Mode",
+                    "type": "string",
+                    "x-eda-nokia-com": {
+                      "ui-column-span": 2,
+                      "ui-order-priority": 1000
+                    }
+                  },
+                  "samplingIntervalUs": {
+                    "default": 5,
+                    "description": "The sampling interval of interface state, in microseconds.",
+                    "format": "int32",
+                    "maximum": 255,
+                    "minimum": 1,
+                    "title": "Sampling Interval",
+                    "type": "integer",
+                    "x-eda-nokia-com": {
+                      "ui-column-span": 2,
+                      "ui-order-priority": 4000
+                    }
+                  }
+                },
+                "title": "Dynamic Load Balancing",
+                "type": "object",
+                "x-eda-nokia-com": {
+                  "ui-column-span": 2,
+                  "ui-order-priority": 8000
                 }
               },
               "gpuIsolationGroups": {
@@ -1059,8 +1152,12 @@
                     "interfaceSelectors": {
                       "format": "labelselector",
                       "items": {
+                        "maxLength": 253,
+                        "minLength": 1,
                         "type": "string"
                       },
+                      "maxItems": 1024,
+                      "minItems": 1,
                       "title": "Interface Selector",
                       "type": "array",
                       "x-eda-nokia-com": {
@@ -1108,6 +1205,8 @@
                     },
                     "name": {
                       "description": "Name of the IsolationGroup.",
+                      "maxLength": 253,
+                      "minLength": 1,
                       "title": "Isolation Group",
                       "type": "string",
                       "x-eda-nokia-com": {
@@ -1122,31 +1221,36 @@
                   ],
                   "type": "object"
                 },
+                "maxItems": 1024,
+                "minItems": 1,
                 "title": "GPU Isolation Groups",
                 "type": "array",
                 "x-eda-nokia-com": {
                   "ui-column-span": 4,
-                  "ui-order-priority": 500
+                  "ui-order-priority": 4000
                 }
               },
               "ipMTU": {
                 "default": 4200,
-                "description": "IP MTU for this fabric. Default is 4136 bytes.",
+                "description": "IP MTU for this fabric.",
+                "format": "int32",
                 "maximum": 9000,
                 "minimum": 1500,
                 "title": "IP MTU",
                 "type": "integer",
                 "x-eda-nokia-com": {
                   "ui-column-span": 2,
-                  "ui-order-priority": 275
+                  "ui-order-priority": 8000
                 }
               },
               "rocev2QoS": {
+                "default": {},
                 "description": "Set of properties to configure the RoCEv2 QoS.",
                 "properties": {
                   "ecnMaxDropProbabilityPercent": {
                     "default": 100,
                     "description": "If the queue depth is between min and max threshold then this the probability with which packets are dropped or marked.",
+                    "format": "int32",
                     "title": "ECN Max Drop Probability Percent",
                     "type": "integer",
                     "x-eda-nokia-com": {
@@ -1156,6 +1260,7 @@
                   "ecnSlopeMaxThresholdPercent": {
                     "default": 80,
                     "description": "The maximum threshold parameter for a RED-managed queue in percent. When the average queue length exceeds the max value, all packets are dropped (or marked if ECN is enabled). Mutually exclusive with min-threshold and max-threshold.",
+                    "format": "int32",
                     "title": "ECN Max Threshold Percent",
                     "type": "integer",
                     "x-eda-nokia-com": {
@@ -1166,6 +1271,7 @@
                   "ecnSlopeMinThresholdPercent": {
                     "default": 5,
                     "description": "The minimum threshold parameter for a RED-managed queue in percent. When the average queue length is less than min, all packets are admitted to the queue. Mutually exclusive with min-threshold and max-threshold.",
+                    "format": "int32",
                     "title": "ECN Min Threshold Percent",
                     "type": "integer",
                     "x-eda-nokia-com": {
@@ -1176,6 +1282,9 @@
                   "pfcDeadlockDetectionTimerMs": {
                     "default": 750,
                     "description": "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.",
+                    "format": "int64",
+                    "maximum": 1500,
+                    "minimum": 100,
                     "title": "PFC Deadlock Detection Timer",
                     "type": "integer",
                     "x-eda-nokia-com": {
@@ -1186,6 +1295,9 @@
                   "pfcDeadlockRecoveryTimerMs": {
                     "default": 750,
                     "description": "Number of milliseconds during which the pfc-pause-frames will be ignored.",
+                    "format": "int64",
+                    "maximum": 1500,
+                    "minimum": 100,
                     "title": "PFC Deadlock Recovery Timer",
                     "type": "integer",
                     "x-eda-nokia-com": {
@@ -1196,8 +1308,8 @@
                   "queueMaximumBurstSizeBytes": {
                     "default": 1024000,
                     "description": "Maximum amount of shared buffer memory available to the queue in bytes.",
-                    "format": "int32",
-                    "maximum": 4294967295,
+                    "format": "int64",
+                    "maximum": 268435456,
                     "minimum": 0,
                     "title": "Maximum Burst Size",
                     "type": "integer",
@@ -1206,19 +1318,12 @@
                     }
                   }
                 },
-                "required": [
-                  "ecnMaxDropProbabilityPercent",
-                  "ecnSlopeMaxThresholdPercent",
-                  "ecnSlopeMinThresholdPercent",
-                  "pfcDeadlockDetectionTimerMs",
-                  "pfcDeadlockRecoveryTimerMs",
-                  "queueMaximumBurstSizeBytes"
-                ],
                 "title": "RoCEv2 QoS",
                 "type": "object",
                 "x-eda-nokia-com": {
                   "ui-column-span": 2,
-                  "ui-order-priority": 600
+                  "ui-order-priority": 9000,
+                  "ui-presence-default": true
                 }
               },
               "stripeConnector": {
@@ -1226,6 +1331,8 @@
                 "properties": {
                   "asnPool": {
                     "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.",
+                    "maxLength": 253,
+                    "minLength": 1,
                     "title": "Autonomous System Pool",
                     "type": "string",
                     "x-eda-nokia-com": {
@@ -1248,8 +1355,12 @@
                     "description": "Selects TopoLinks to include in this AI Fabric, the selected TopoLinks will be used to create ISLs between the stripe connector devices and the leaf devices.",
                     "format": "labelselector",
                     "items": {
+                      "maxLength": 253,
+                      "minLength": 1,
                       "type": "string"
                     },
+                    "maxItems": 256,
+                    "minItems": 1,
                     "title": "Link Selector",
                     "type": "array",
                     "x-eda-nokia-com": {
@@ -1267,6 +1378,8 @@
                   },
                   "name": {
                     "description": "The name of the Stripe Connector.",
+                    "maxLength": 253,
+                    "minLength": 1,
                     "title": "Stripe Connector Name",
                     "type": "string",
                     "x-eda-nokia-com": {
@@ -1279,8 +1392,12 @@
                     "description": "Node selector to select the nodes to be used for this stripe connector.",
                     "format": "labelselector",
                     "items": {
+                      "maxLength": 253,
+                      "minLength": 1,
                       "type": "string"
                     },
+                    "maxItems": 256,
+                    "minItems": 1,
                     "title": "Node Selector",
                     "type": "array",
                     "x-eda-nokia-com": {
@@ -1298,6 +1415,8 @@
                   },
                   "systemPoolIPv4": {
                     "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool.",
+                    "maxLength": 253,
+                    "minLength": 1,
                     "title": "IPv4 Pool - System IP",
                     "type": "string",
                     "x-eda-nokia-com": {
@@ -1326,7 +1445,7 @@
                 "type": "object",
                 "x-eda-nokia-com": {
                   "ui-column-span": 4,
-                  "ui-order-priority": 400
+                  "ui-order-priority": 6000
                 }
               },
               "stripes": {
@@ -1335,6 +1454,8 @@
                   "properties": {
                     "asnPool": {
                       "description": "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange.",
+                      "maxLength": 253,
+                      "minLength": 1,
                       "title": "Autonomous System Pool",
                       "type": "string",
                       "x-eda-nokia-com": {
@@ -1366,6 +1487,8 @@
                     },
                     "name": {
                       "description": "The name of the Stripe.",
+                      "maxLength": 253,
+                      "minLength": 1,
                       "title": "Stripe Name",
                       "type": "string",
                       "x-eda-nokia-com": {
@@ -1378,8 +1501,12 @@
                       "description": "Node selector to select the nodes to be used for this stripe.",
                       "format": "labelselector",
                       "items": {
+                        "maxLength": 253,
+                        "minLength": 1,
                         "type": "string"
                       },
+                      "maxItems": 256,
+                      "minItems": 1,
                       "title": "Node Selector",
                       "type": "array",
                       "x-eda-nokia-com": {
@@ -1397,6 +1524,9 @@
                     },
                     "stripeID": {
                       "description": "Unique ID for a stripe",
+                      "format": "int64",
+                      "maximum": 256,
+                      "minimum": 0,
                       "title": "Stripe ID",
                       "type": "integer",
                       "x-eda-nokia-com": {
@@ -1407,6 +1537,8 @@
                     },
                     "systemPoolIPv4": {
                       "description": "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet.",
+                      "maxLength": 253,
+                      "minLength": 1,
                       "title": "IPv4 Pool - System IP",
                       "type": "string",
                       "x-eda-nokia-com": {
@@ -1433,15 +1565,19 @@
                   ],
                   "type": "object"
                 },
+                "maxItems": 256,
+                "minItems": 1,
                 "title": "Stripes",
                 "type": "array",
                 "x-eda-nokia-com": {
                   "ui-column-span": 4,
-                  "ui-order-priority": 300
+                  "ui-order-priority": 5000
                 }
               },
               "systemPoolIPv4": {
                 "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence.",
+                "maxLength": 253,
+                "minLength": 1,
                 "title": "IPv4 Pool - System IP",
                 "type": "string",
                 "x-eda-nokia-com": {
@@ -1456,14 +1592,44 @@
                   ],
                   "ui-category": "IPPools",
                   "ui-column-span": 2,
-                  "ui-order-priority": 100,
+                  "ui-order-priority": 2000,
                   "ui-single-line-group": "systemasn"
+                }
+              },
+              "type": {
+                "description": "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN.",
+                "properties": {
+                  "overlay": {
+                    "description": "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).",
+                    "enum": [
+                      "EVPN",
+                      "RouteLeaking"
+                    ],
+                    "maxLength": 253,
+                    "minLength": 1,
+                    "title": "Overlay",
+                    "type": "string",
+                    "x-eda-nokia-com": {
+                      "ui-column-span": 2,
+                      "ui-description": "Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).",
+                      "ui-order-priority": 5000,
+                      "ui-summary": "Overlay type for the AI Fabric"
+                    }
+                  }
+                },
+                "required": [
+                  "overlay"
+                ],
+                "title": "Backend Type",
+                "type": "object",
+                "x-eda-nokia-com": {
+                  "ui-column-span": 2,
+                  "ui-order-priority": 1000
                 }
               }
             },
             "required": [
               "gpuIsolationGroups",
-              "rocev2QoS",
               "stripes"
             ],
             "title": "Specification",
@@ -1477,6 +1643,9 @@
             "properties": {
               "health": {
                 "description": "Indicates the health score of the Fabric.  The health score of the Fabric is determined by the aggregate health score of the resources emitted by the Fabric such as ISL, DefaultRouteReflectors etc.",
+                "format": "int32",
+                "maximum": 100,
+                "minimum": 0,
                 "title": "Health",
                 "type": "integer",
                 "x-eda-nokia-com": {
@@ -1486,6 +1655,8 @@
               },
               "healthScoreReason": {
                 "description": "Indicates the reason for the health score.",
+                "maxLength": 32768,
+                "minLength": 1,
                 "title": "Health Score Reason",
                 "type": "string",
                 "x-eda-nokia-com": {
@@ -1495,6 +1666,8 @@
               "lastChangeTime": {
                 "description": "The time when the state of the resource last changed.",
                 "format": "date-time",
+                "maxLength": 253,
+                "minLength": 1,
                 "title": "Last Change",
                 "type": "string"
               },
@@ -1506,14 +1679,42 @@
                   "Degraded",
                   "Unknown"
                 ],
+                "maxLength": 253,
+                "minLength": 1,
                 "title": "Operational State",
-                "type": "string"
+                "type": "string",
+                "x-eda-nokia-com": {
+                  "ui-render": [
+                    {
+                      "color": "kpi_success",
+                      "condition": "field===\"Up\"",
+                      "icon": "ArrowUpCircle"
+                    },
+                    {
+                      "color": "kpi_major",
+                      "condition": "field===\"Degraded\"",
+                      "icon": "AlarmCircle"
+                    },
+                    {
+                      "color": "kpi_critical",
+                      "condition": "field===\"Down\"",
+                      "icon": "ArrowDownCircle"
+                    },
+                    {
+                      "color": "kpi_warning",
+                      "condition": "field===\"Unknown\"",
+                      "icon": "RemoveCircle"
+                    }
+                  ]
+                }
               },
               "stripeConnector": {
                 "description": "Stripe connector in the Backend.",
                 "properties": {
                   "name": {
                     "description": "The name of the Stripe Connector.",
+                    "maxLength": 253,
+                    "minLength": 1,
                     "title": "Stripe Connector Name",
                     "type": "string"
                   },
@@ -1523,22 +1724,30 @@
                       "properties": {
                         "node": {
                           "description": "Name of the TopoNode.",
+                          "maxLength": 253,
+                          "minLength": 1,
                           "title": "Node",
                           "type": "string"
                         },
                         "operatingSystem": {
                           "description": "Operating system running on the node.",
+                          "maxLength": 253,
+                          "minLength": 1,
                           "title": "Operating System",
                           "type": "string"
                         },
                         "operatingSystemVersion": {
                           "description": "Operating system version running on the node.",
+                          "maxLength": 253,
+                          "minLength": 1,
                           "title": "Operating System Version",
                           "type": "string"
                         }
                       },
                       "type": "object"
                     },
+                    "maxItems": 1024,
+                    "minItems": 1,
                     "title": "Leaf Nodes",
                     "type": "array"
                   }
@@ -1556,33 +1765,45 @@
                         "properties": {
                           "node": {
                             "description": "Name of the TopoNode.",
+                            "maxLength": 253,
+                            "minLength": 1,
                             "title": "Node",
                             "type": "string"
                           },
                           "operatingSystem": {
                             "description": "Operating system running on the node.",
+                            "maxLength": 253,
+                            "minLength": 1,
                             "title": "Operating System",
                             "type": "string"
                           },
                           "operatingSystemVersion": {
                             "description": "Operating system version running on the node.",
+                            "maxLength": 253,
+                            "minLength": 1,
                             "title": "Operating System Version",
                             "type": "string"
                           }
                         },
                         "type": "object"
                       },
+                      "maxItems": 8192,
+                      "minItems": 1,
                       "title": "Leaf Nodes",
                       "type": "array"
                     },
                     "name": {
                       "description": "The name of the Stripe.",
+                      "maxLength": 253,
+                      "minLength": 1,
                       "title": "Stripe Name",
                       "type": "string"
                     }
                   },
                   "type": "object"
                 },
+                "maxItems": 256,
+                "minItems": 1,
                 "title": "Stripes",
                 "type": "array"
               }
@@ -1631,6 +1852,10 @@
             "format": "date-time",
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "group": "core.eda.nokia.com",
+                "title": "commitTime"
+              },
               "ui-order-priority": 50,
               "ui-title": "Commit Time",
               "ui-title-key": "commitTime"
@@ -1639,6 +1864,10 @@
           "hash": {
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "group": "core.eda.nokia.com",
+                "title": "commitHash"
+              },
               "ui-order-priority": 40,
               "ui-title": "Commit Hash",
               "ui-title-key": "commitHash"
@@ -1647,6 +1876,14 @@
           "name": {
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "group": "core.eda.nokia.com",
+                "title": "name"
+              },
+              "key": {
+                "index": 2,
+                "is-name": true
+              },
               "ui-order-priority": 10,
               "ui-title": "Name",
               "ui-title-key": "name"
@@ -1655,6 +1892,14 @@
           "namespace": {
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "group": "core.eda.nokia.com",
+                "title": "namespace"
+              },
+              "key": {
+                "index": 1,
+                "is-namespace": true
+              },
               "ui-order-priority": 20,
               "ui-title": "Namespace",
               "ui-title-key": "namespace"
@@ -1664,6 +1909,10 @@
             "format": "uint64",
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "group": "core.eda.nokia.com",
+                "title": "transactionId"
+              },
               "ui-order-priority": 30,
               "ui-title": "Transaction ID",
               "ui-title-key": "transactionId"
@@ -1685,6 +1934,9 @@
             "readOnly": true,
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "alarm_severities.critical"
+              },
               "ui-title": "Critical",
               "ui-title-key": "alarm_severities.critical"
             }
@@ -1694,6 +1946,9 @@
             "readOnly": true,
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "alarm_severities.major"
+              },
               "ui-title": "Major",
               "ui-title-key": "alarm_severities.major"
             }
@@ -1703,6 +1958,9 @@
             "readOnly": true,
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "alarm_severities.minor"
+              },
               "ui-title": "minor",
               "ui-title-key": "alarm_severities.minor"
             }
@@ -1712,6 +1970,9 @@
             "readOnly": true,
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "alarm_severities.warning"
+              },
               "ui-title": "Warning",
               "ui-title-key": "alarm_severities.warning"
             }
@@ -1720,6 +1981,10 @@
         "readOnly": true,
         "type": "object",
         "x-eda-nokia-com": {
+          "i18n-keys": {
+            "group": "core.eda.nokia.com",
+            "title": "alarms"
+          },
           "ui-order-priority": 40,
           "ui-title": "Alarms",
           "ui-title-key": "alarms"
@@ -1732,6 +1997,9 @@
             "readOnly": true,
             "type": "integer",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "count_column"
+              },
               "ui-title": "Count",
               "ui-title-key": "count_column"
             }
@@ -1740,6 +2008,10 @@
         "readOnly": true,
         "type": "object",
         "x-eda-nokia-com": {
+          "i18n-keys": {
+            "group": "core.eda.nokia.com",
+            "title": "deviations"
+          },
           "ui-order-priority": 50,
           "ui-title": "Deviations",
           "ui-title-key": "deviations"
@@ -1753,6 +2025,9 @@
             },
             "type": "object",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "annotations"
+              },
               "ui-order-priority": 40,
               "ui-title": "Annotations",
               "ui-title-key": "annotations"
@@ -1764,6 +2039,9 @@
             },
             "type": "object",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "labels"
+              },
               "ui-auto-completes": [
                 {
                   "condition": "true",
@@ -1783,7 +2061,15 @@
             "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "name"
+              },
               "immutable": true,
+              "key": {
+                "index": 2,
+                "is-mirror": true,
+                "is-name": true
+              },
               "ui-order-priority": 10,
               "ui-pattern-error": "A valid name is made up of one or more components where each component is separated by period characters.  Each component must start and end with a lower case alphanumeric character and the body of the component is made up of zero or more lower case alphanumeric and hyphen characters.",
               "ui-title": "Name",
@@ -1793,7 +2079,15 @@
           "namespace": {
             "type": "string",
             "x-eda-nokia-com": {
+              "i18n-keys": {
+                "title": "namespace"
+              },
               "immutable": true,
+              "key": {
+                "index": 1,
+                "is-mirror": true,
+                "is-namespace": true
+              },
               "ui-order-priority": 20,
               "ui-title": "Namespace",
               "ui-title-key": "namespace"
@@ -1806,6 +2100,10 @@
         ],
         "type": "object",
         "x-eda-nokia-com": {
+          "i18n-keys": {
+            "group": "core.eda.nokia.com",
+            "title": "metadata"
+          },
           "ui-order-priority": 10,
           "ui-title": "Metadata",
           "ui-title-key": "metadata"
@@ -2077,6 +2375,15 @@
             }
           },
           {
+            "description": "If true, pipelines will not be run for the resulting transaction",
+            "in": "query",
+            "name": "skipPipeline",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "the namespace scope from which to perform the delete",
             "in": "path",
             "name": "namespace",
@@ -2240,6 +2547,15 @@
             }
           },
           {
+            "description": "If true, pipelines will not be run for the resulting transaction",
+            "in": "query",
+            "name": "skipPipeline",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "in": "path",
             "name": "namespace",
             "required": true,
@@ -2375,6 +2691,15 @@
             "description": "If true, prevents the transaction resulting from this request from being bundled with others.",
             "in": "query",
             "name": "disableBatching",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "If true, pipelines will not be run for the resulting transaction",
+            "in": "query",
+            "name": "skipPipeline",
             "schema": {
               "default": false,
               "type": "boolean"
@@ -2535,6 +2860,15 @@
             }
           },
           {
+            "description": "If true, pipelines will not be run for the resulting transaction",
+            "in": "query",
+            "name": "skipPipeline",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "in": "path",
             "name": "namespace",
             "required": true,
@@ -2613,6 +2947,15 @@
             "description": "If true, prevents the transaction resulting from this request from being bundled with others.",
             "in": "query",
             "name": "disableBatching",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "If true, pipelines will not be run for the resulting transaction",
+            "in": "query",
+            "name": "skipPipeline",
             "schema": {
               "default": false,
               "type": "boolean"

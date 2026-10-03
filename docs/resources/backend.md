@@ -50,16 +50,18 @@ Optional:
 Required:
 
 - `gpu_isolation_groups` (Attributes List) GPU Isolation Groups are used to isolate GPU traffic over the network, GPUs in different GPU isolation groups will not be able to communicate with each other.  If all GPUs across all stripes need to be able to communicate with each other, create a single GPUIsolationGroup selecting all GPU facing interfaces. (see [below for nested schema](#nestedatt--spec--gpu_isolation_groups))
-- `rocev2_qos` (Attributes) Set of properties to configure the RoCEv2 QoS. (see [below for nested schema](#nestedatt--spec--rocev2_qos))
 - `stripes` (Attributes List) A list of stripes, stripes contain a set of nodes (rails). (see [below for nested schema](#nestedatt--spec--stripes))
 
 Optional:
 
 - `address_allocation` (Attributes) Address allocation profile for GPU endpoints. (see [below for nested schema](#nestedatt--spec--address_allocation))
 - `asn_pool` (String) Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol.
-- `ip_mtu` (Number) IP MTU for this fabric. Default is 4136 bytes.
+- `dynamic_load_balancing` (Attributes) Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric. (see [below for nested schema](#nestedatt--spec--dynamic_load_balancing))
+- `ip_mtu` (Number) IP MTU for this fabric.
+- `rocev2_qos` (Attributes) Set of properties to configure the RoCEv2 QoS. (see [below for nested schema](#nestedatt--spec--rocev2_qos))
 - `stripe_connector` (Attributes) StripeConnector is the spine layer interconnecting multiple stripes. (see [below for nested schema](#nestedatt--spec--stripe_connector))
 - `system_pool_ipv4` (String) Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence.
+- `type` (Attributes) Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN. (see [below for nested schema](#nestedatt--spec--type))
 
 <a id="nestedatt--spec--gpu_isolation_groups"></a>
 ### Nested Schema for `spec.gpu_isolation_groups`
@@ -80,19 +82,6 @@ Required:
 
 - `name` (String) Reference to an IPv6 allocation pool to use for prefix allocation.
 
-
-
-<a id="nestedatt--spec--rocev2_qos"></a>
-### Nested Schema for `spec.rocev2_qos`
-
-Optional:
-
-- `ecn_max_drop_probability_percent` (Number) If the queue depth is between min and max threshold then this the probability with which packets are dropped or marked.
-- `ecn_slope_max_threshold_percent` (Number) The maximum threshold parameter for a RED-managed queue in percent. When the average queue length exceeds the max value, all packets are dropped (or marked if ECN is enabled). Mutually exclusive with min-threshold and max-threshold.
-- `ecn_slope_min_threshold_percent` (Number) The minimum threshold parameter for a RED-managed queue in percent. When the average queue length is less than min, all packets are admitted to the queue. Mutually exclusive with min-threshold and max-threshold.
-- `pfc_deadlock_detection_timer_ms` (Number) Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.
-- `pfc_deadlock_recovery_timer_ms` (Number) Number of milliseconds during which the pfc-pause-frames will be ignored.
-- `queue_maximum_burst_size_bytes` (Number) Maximum amount of shared buffer memory available to the queue in bytes.
 
 
 <a id="nestedatt--spec--stripes"></a>
@@ -138,6 +127,30 @@ Required:
 
 
 
+<a id="nestedatt--spec--dynamic_load_balancing"></a>
+### Nested Schema for `spec.dynamic_load_balancing`
+
+Optional:
+
+- `flowset_size` (Number) The number of flowset entries reserved for each aggregate ECMP group.
+- `inactivity_timer_us` (Number) The flow inactivity timer in microseconds.
+- `mode` (String) The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows.
+- `sampling_interval_us` (Number) The sampling interval of interface state, in microseconds.
+
+
+<a id="nestedatt--spec--rocev2_qos"></a>
+### Nested Schema for `spec.rocev2_qos`
+
+Optional:
+
+- `ecn_max_drop_probability_percent` (Number) If the queue depth is between min and max threshold then this the probability with which packets are dropped or marked.
+- `ecn_slope_max_threshold_percent` (Number) The maximum threshold parameter for a RED-managed queue in percent. When the average queue length exceeds the max value, all packets are dropped (or marked if ECN is enabled). Mutually exclusive with min-threshold and max-threshold.
+- `ecn_slope_min_threshold_percent` (Number) The minimum threshold parameter for a RED-managed queue in percent. When the average queue length is less than min, all packets are admitted to the queue. Mutually exclusive with min-threshold and max-threshold.
+- `pfc_deadlock_detection_timer_ms` (Number) Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.
+- `pfc_deadlock_recovery_timer_ms` (Number) Number of milliseconds during which the pfc-pause-frames will be ignored.
+- `queue_maximum_burst_size_bytes` (Number) Maximum amount of shared buffer memory available to the queue in bytes.
+
+
 <a id="nestedatt--spec--stripe_connector"></a>
 ### Nested Schema for `spec.stripe_connector`
 
@@ -151,6 +164,14 @@ Optional:
 
 - `asn_pool` (String) Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.
 - `system_pool_ipv4` (String) Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool.
+
+
+<a id="nestedatt--spec--type"></a>
+### Nested Schema for `spec.type`
+
+Required:
+
+- `overlay` (String) Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).
 
 
 

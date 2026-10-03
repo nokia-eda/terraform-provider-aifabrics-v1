@@ -191,29 +191,29 @@
                     {
                         "name": "spec",
                         "single_nested": {
-                            "computed_optional_required": "optional",
+                            "computed_optional_required": "computed",
                             "attributes": [
                                 {
                                     "name": "address_allocation",
                                     "single_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "attributes": [
                                             {
                                                 "name": "eda_managed_ipv6",
                                                 "single_nested": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "attributes": [
                                                         {
                                                             "name": "leaf_index_pool_scope",
                                                             "string": {
-                                                                "computed_optional_required": "optional",
+                                                                "computed_optional_required": "computed",
                                                                 "description": "Leaf Index Pool Allocation scope (used for IP Address allocation). Global scope means that the leaf index will be allocated from a common pool for the entire namespace, Fabric scope means that the leaf index will be allocated from a pool for the entire fabric, Stripe scope means that the leaf index will be allocated from a pool for the stripe."
                                                             }
                                                         },
                                                         {
                                                             "name": "prefix_length",
                                                             "string": {
-                                                                "computed_optional_required": "optional",
+                                                                "computed_optional_required": "computed",
                                                                 "description": "IPv6 Prefix Length."
                                                             }
                                                         }
@@ -224,12 +224,12 @@
                                             {
                                                 "name": "global_ipv6_pool",
                                                 "single_nested": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "attributes": [
                                                         {
                                                             "name": "name",
                                                             "string": {
-                                                                "computed_optional_required": "optional",
+                                                                "computed_optional_required": "computed",
                                                                 "description": "Reference to an IPv6 allocation pool to use for prefix allocation."
                                                             }
                                                         }
@@ -240,7 +240,7 @@
                                             {
                                                 "name": "type",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Type of address allocation strategy."
                                                 }
                                             }
@@ -251,20 +251,57 @@
                                 {
                                     "name": "asn_pool",
                                     "string": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol."
+                                    }
+                                },
+                                {
+                                    "name": "dynamic_load_balancing",
+                                    "single_nested": {
+                                        "computed_optional_required": "computed",
+                                        "attributes": [
+                                            {
+                                                "name": "flowset_size",
+                                                "int64": {
+                                                    "computed_optional_required": "computed",
+                                                    "description": "The number of flowset entries reserved for each aggregate ECMP group."
+                                                }
+                                            },
+                                            {
+                                                "name": "inactivity_timer_us",
+                                                "int64": {
+                                                    "computed_optional_required": "computed",
+                                                    "description": "The flow inactivity timer in microseconds."
+                                                }
+                                            },
+                                            {
+                                                "name": "mode",
+                                                "string": {
+                                                    "computed_optional_required": "computed",
+                                                    "description": "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows."
+                                                }
+                                            },
+                                            {
+                                                "name": "sampling_interval_us",
+                                                "int64": {
+                                                    "computed_optional_required": "computed",
+                                                    "description": "The sampling interval of interface state, in microseconds."
+                                                }
+                                            }
+                                        ],
+                                        "description": "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric."
                                     }
                                 },
                                 {
                                     "name": "gpu_isolation_groups",
                                     "list_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "nested_object": {
                                             "attributes": [
                                                 {
                                                     "name": "interface_selectors",
                                                     "list": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "element_type": {
                                                             "string": {}
                                                         }
@@ -273,12 +310,12 @@
                                                 {
                                                     "name": "ipv6_pool",
                                                     "single_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "attributes": [
                                                             {
                                                                 "name": "name",
                                                                 "string": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Reference to an IPv6 allocation pool to use for prefix allocation."
                                                                 }
                                                             }
@@ -289,7 +326,7 @@
                                                 {
                                                     "name": "name",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Name of the IsolationGroup."
                                                     }
                                                 }
@@ -301,54 +338,54 @@
                                 {
                                     "name": "ip_mtu",
                                     "int64": {
-                                        "computed_optional_required": "optional",
-                                        "description": "IP MTU for this fabric. Default is 4136 bytes."
+                                        "computed_optional_required": "computed",
+                                        "description": "IP MTU for this fabric."
                                     }
                                 },
                                 {
                                     "name": "rocev2_qos",
                                     "single_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "attributes": [
                                             {
                                                 "name": "ecn_max_drop_probability_percent",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "If the queue depth is between min and max threshold then this the probability with which packets are dropped or marked."
                                                 }
                                             },
                                             {
                                                 "name": "ecn_slope_max_threshold_percent",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "The maximum threshold parameter for a RED-managed queue in percent. When the average queue length exceeds the max value, all packets are dropped (or marked if ECN is enabled). Mutually exclusive with min-threshold and max-threshold."
                                                 }
                                             },
                                             {
                                                 "name": "ecn_slope_min_threshold_percent",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "The minimum threshold parameter for a RED-managed queue in percent. When the average queue length is less than min, all packets are admitted to the queue. Mutually exclusive with min-threshold and max-threshold."
                                                 }
                                             },
                                             {
                                                 "name": "pfc_deadlock_detection_timer_ms",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer."
                                                 }
                                             },
                                             {
                                                 "name": "pfc_deadlock_recovery_timer_ms",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Number of milliseconds during which the pfc-pause-frames will be ignored."
                                                 }
                                             },
                                             {
                                                 "name": "queue_maximum_burst_size_bytes",
                                                 "int64": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Maximum amount of shared buffer memory available to the queue in bytes."
                                                 }
                                             }
@@ -359,19 +396,19 @@
                                 {
                                     "name": "stripe_connector",
                                     "single_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "attributes": [
                                             {
                                                 "name": "asn_pool",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations."
                                                 }
                                             },
                                             {
                                                 "name": "link_selectors",
                                                 "list": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "element_type": {
                                                         "string": {}
                                                     },
@@ -381,14 +418,14 @@
                                             {
                                                 "name": "name",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "The name of the Stripe Connector."
                                                 }
                                             },
                                             {
                                                 "name": "node_selectors",
                                                 "list": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "element_type": {
                                                         "string": {}
                                                     },
@@ -398,7 +435,7 @@
                                             {
                                                 "name": "system_pool_ipv4",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed",
                                                     "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool."
                                                 }
                                             }
@@ -409,34 +446,34 @@
                                 {
                                     "name": "stripes",
                                     "list_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "nested_object": {
                                             "attributes": [
                                                 {
                                                     "name": "asn_pool",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange."
                                                     }
                                                 },
                                                 {
                                                     "name": "gpu_vlan",
                                                     "int64": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "The VLAN used on interfaces facing the GPU servers."
                                                     }
                                                 },
                                                 {
                                                     "name": "name",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "The name of the Stripe."
                                                     }
                                                 },
                                                 {
                                                     "name": "node_selectors",
                                                     "list": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "element_type": {
                                                             "string": {}
                                                         },
@@ -446,14 +483,14 @@
                                                 {
                                                     "name": "stripe_id",
                                                     "int64": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Unique ID for a stripe"
                                                     }
                                                 },
                                                 {
                                                     "name": "system_pool_ipv4",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet."
                                                     }
                                                 }
@@ -465,8 +502,24 @@
                                 {
                                     "name": "system_pool_ipv4",
                                     "string": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed",
                                         "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence."
+                                    }
+                                },
+                                {
+                                    "name": "spec_type",
+                                    "single_nested": {
+                                        "computed_optional_required": "computed",
+                                        "attributes": [
+                                            {
+                                                "name": "overlay",
+                                                "string": {
+                                                    "computed_optional_required": "computed",
+                                                    "description": "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL)."
+                                                }
+                                            }
+                                        ],
+                                        "description": "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN."
                                     }
                                 }
                             ],
@@ -761,29 +814,29 @@
                                     {
                                         "name": "spec",
                                         "single_nested": {
-                                            "computed_optional_required": "optional",
+                                            "computed_optional_required": "computed",
                                             "attributes": [
                                                 {
                                                     "name": "address_allocation",
                                                     "single_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "attributes": [
                                                             {
                                                                 "name": "eda_managed_ipv6",
                                                                 "single_nested": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "attributes": [
                                                                         {
                                                                             "name": "leaf_index_pool_scope",
                                                                             "string": {
-                                                                                "computed_optional_required": "optional",
+                                                                                "computed_optional_required": "computed",
                                                                                 "description": "Leaf Index Pool Allocation scope (used for IP Address allocation). Global scope means that the leaf index will be allocated from a common pool for the entire namespace, Fabric scope means that the leaf index will be allocated from a pool for the entire fabric, Stripe scope means that the leaf index will be allocated from a pool for the stripe."
                                                                             }
                                                                         },
                                                                         {
                                                                             "name": "prefix_length",
                                                                             "string": {
-                                                                                "computed_optional_required": "optional",
+                                                                                "computed_optional_required": "computed",
                                                                                 "description": "IPv6 Prefix Length."
                                                                             }
                                                                         }
@@ -794,12 +847,12 @@
                                                             {
                                                                 "name": "global_ipv6_pool",
                                                                 "single_nested": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "attributes": [
                                                                         {
                                                                             "name": "name",
                                                                             "string": {
-                                                                                "computed_optional_required": "optional",
+                                                                                "computed_optional_required": "computed",
                                                                                 "description": "Reference to an IPv6 allocation pool to use for prefix allocation."
                                                                             }
                                                                         }
@@ -810,7 +863,7 @@
                                                             {
                                                                 "name": "type",
                                                                 "string": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Type of address allocation strategy."
                                                                 }
                                                             }
@@ -821,20 +874,57 @@
                                                 {
                                                     "name": "asn_pool",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol."
+                                                    }
+                                                },
+                                                {
+                                                    "name": "dynamic_load_balancing",
+                                                    "single_nested": {
+                                                        "computed_optional_required": "computed",
+                                                        "attributes": [
+                                                            {
+                                                                "name": "flowset_size",
+                                                                "int64": {
+                                                                    "computed_optional_required": "computed",
+                                                                    "description": "The number of flowset entries reserved for each aggregate ECMP group."
+                                                                }
+                                                            },
+                                                            {
+                                                                "name": "inactivity_timer_us",
+                                                                "int64": {
+                                                                    "computed_optional_required": "computed",
+                                                                    "description": "The flow inactivity timer in microseconds."
+                                                                }
+                                                            },
+                                                            {
+                                                                "name": "mode",
+                                                                "string": {
+                                                                    "computed_optional_required": "computed",
+                                                                    "description": "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows."
+                                                                }
+                                                            },
+                                                            {
+                                                                "name": "sampling_interval_us",
+                                                                "int64": {
+                                                                    "computed_optional_required": "computed",
+                                                                    "description": "The sampling interval of interface state, in microseconds."
+                                                                }
+                                                            }
+                                                        ],
+                                                        "description": "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric."
                                                     }
                                                 },
                                                 {
                                                     "name": "gpu_isolation_groups",
                                                     "list_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "nested_object": {
                                                             "attributes": [
                                                                 {
                                                                     "name": "interface_selectors",
                                                                     "list": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "element_type": {
                                                                             "string": {}
                                                                         }
@@ -843,12 +933,12 @@
                                                                 {
                                                                     "name": "ipv6_pool",
                                                                     "single_nested": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "attributes": [
                                                                             {
                                                                                 "name": "name",
                                                                                 "string": {
-                                                                                    "computed_optional_required": "optional",
+                                                                                    "computed_optional_required": "computed",
                                                                                     "description": "Reference to an IPv6 allocation pool to use for prefix allocation."
                                                                                 }
                                                                             }
@@ -859,7 +949,7 @@
                                                                 {
                                                                     "name": "name",
                                                                     "string": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "Name of the IsolationGroup."
                                                                     }
                                                                 }
@@ -871,54 +961,54 @@
                                                 {
                                                     "name": "ip_mtu",
                                                     "int64": {
-                                                        "computed_optional_required": "optional",
-                                                        "description": "IP MTU for this fabric. Default is 4136 bytes."
+                                                        "computed_optional_required": "computed",
+                                                        "description": "IP MTU for this fabric."
                                                     }
                                                 },
                                                 {
                                                     "name": "rocev2_qos",
                                                     "single_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "attributes": [
                                                             {
                                                                 "name": "ecn_max_drop_probability_percent",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "If the queue depth is between min and max threshold then this the probability with which packets are dropped or marked."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "ecn_slope_max_threshold_percent",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "The maximum threshold parameter for a RED-managed queue in percent. When the average queue length exceeds the max value, all packets are dropped (or marked if ECN is enabled). Mutually exclusive with min-threshold and max-threshold."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "ecn_slope_min_threshold_percent",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "The minimum threshold parameter for a RED-managed queue in percent. When the average queue length is less than min, all packets are admitted to the queue. Mutually exclusive with min-threshold and max-threshold."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "pfc_deadlock_detection_timer_ms",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "pfc_deadlock_recovery_timer_ms",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Number of milliseconds during which the pfc-pause-frames will be ignored."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "queue_maximum_burst_size_bytes",
                                                                 "int64": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Maximum amount of shared buffer memory available to the queue in bytes."
                                                                 }
                                                             }
@@ -929,19 +1019,19 @@
                                                 {
                                                     "name": "stripe_connector",
                                                     "single_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "attributes": [
                                                             {
                                                                 "name": "asn_pool",
                                                                 "string": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "link_selectors",
                                                                 "list": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "element_type": {
                                                                         "string": {}
                                                                     },
@@ -951,14 +1041,14 @@
                                                             {
                                                                 "name": "name",
                                                                 "string": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "The name of the Stripe Connector."
                                                                 }
                                                             },
                                                             {
                                                                 "name": "node_selectors",
                                                                 "list": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "element_type": {
                                                                         "string": {}
                                                                     },
@@ -968,7 +1058,7 @@
                                                             {
                                                                 "name": "system_pool_ipv4",
                                                                 "string": {
-                                                                    "computed_optional_required": "optional",
+                                                                    "computed_optional_required": "computed",
                                                                     "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool."
                                                                 }
                                                             }
@@ -979,34 +1069,34 @@
                                                 {
                                                     "name": "stripes",
                                                     "list_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "nested_object": {
                                                             "attributes": [
                                                                 {
                                                                     "name": "asn_pool",
                                                                     "string": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange."
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "gpu_vlan",
                                                                     "int64": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "The VLAN used on interfaces facing the GPU servers."
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "name",
                                                                     "string": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "The name of the Stripe."
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "node_selectors",
                                                                     "list": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "element_type": {
                                                                             "string": {}
                                                                         },
@@ -1016,14 +1106,14 @@
                                                                 {
                                                                     "name": "stripe_id",
                                                                     "int64": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "Unique ID for a stripe"
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "system_pool_ipv4",
                                                                     "string": {
-                                                                        "computed_optional_required": "optional",
+                                                                        "computed_optional_required": "computed",
                                                                         "description": "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet."
                                                                     }
                                                                 }
@@ -1035,8 +1125,24 @@
                                                 {
                                                     "name": "system_pool_ipv4",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed",
                                                         "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence."
+                                                    }
+                                                },
+                                                {
+                                                    "name": "spec_type",
+                                                    "single_nested": {
+                                                        "computed_optional_required": "computed",
+                                                        "attributes": [
+                                                            {
+                                                                "name": "overlay",
+                                                                "string": {
+                                                                    "computed_optional_required": "computed",
+                                                                    "description": "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL)."
+                                                                }
+                                                            }
+                                                        ],
+                                                        "description": "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN."
                                                     }
                                                 }
                                             ],
@@ -1436,12 +1542,12 @@
                                 {
                                     "name": "address_allocation",
                                     "single_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed_optional",
                                         "attributes": [
                                             {
                                                 "name": "eda_managed_ipv6",
                                                 "single_nested": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed_optional",
                                                     "attributes": [
                                                         {
                                                             "name": "leaf_index_pool_scope",
@@ -1460,6 +1566,16 @@
                                                                                 }
                                                                             ],
                                                                             "schema_definition": "stringvalidator.OneOf(\n\"Global\",\n\"Fabric\",\n\"Stripe\",\n)"
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "custom": {
+                                                                            "imports": [
+                                                                                {
+                                                                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                }
+                                                                            ],
+                                                                            "schema_definition": "stringvalidator.LengthBetween(1, 253)"
                                                                         }
                                                                     }
                                                                 ]
@@ -1483,6 +1599,16 @@
                                                                             ],
                                                                             "schema_definition": "stringvalidator.OneOf(\n\"64\",\n\"96\",\n)"
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        "custom": {
+                                                                            "imports": [
+                                                                                {
+                                                                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                }
+                                                                            ],
+                                                                            "schema_definition": "stringvalidator.LengthBetween(1, 3)"
+                                                                        }
                                                                     }
                                                                 ]
                                                             }
@@ -1494,7 +1620,7 @@
                                             {
                                                 "name": "global_ipv6_pool",
                                                 "single_nested": {
-                                                    "computed_optional_required": "optional",
+                                                    "computed_optional_required": "computed_optional",
                                                     "attributes": [
                                                         {
                                                             "name": "name",
@@ -1525,6 +1651,16 @@
                                                                 ],
                                                                 "schema_definition": "stringvalidator.OneOf(\n\"EDAManagedIPv6\",\n\"GlobalIPv6Pool\",\n\"PerTenantIPv6Pool\",\n)"
                                                             }
+                                                        },
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
                                                         }
                                                     ]
                                                 }
@@ -1536,8 +1672,137 @@
                                 {
                                     "name": "asn_pool",
                                     "string": {
-                                        "computed_optional_required": "optional",
-                                        "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol."
+                                        "computed_optional_required": "computed_optional",
+                                        "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "dynamic_load_balancing",
+                                    "single_nested": {
+                                        "computed_optional_required": "computed_optional",
+                                        "attributes": [
+                                            {
+                                                "name": "flowset_size",
+                                                "int64": {
+                                                    "computed_optional_required": "computed_optional",
+                                                    "default": {
+                                                        "static": 256
+                                                    },
+                                                    "description": "The number of flowset entries reserved for each aggregate ECMP group.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.OneOf(\n256,\n512,\n1024,\n2048,\n4096,\n8192,\n16384,\n32768,\n)"
+                                                            }
+                                                        },
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.Between(256, 32768)"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "name": "inactivity_timer_us",
+                                                "int64": {
+                                                    "computed_optional_required": "computed_optional",
+                                                    "default": {
+                                                        "static": 50
+                                                    },
+                                                    "description": "The flow inactivity timer in microseconds.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.Between(1, 65535)"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "name": "mode",
+                                                "string": {
+                                                    "computed_optional_required": "computed_optional",
+                                                    "default": {
+                                                        "static": "Dynamic"
+                                                    },
+                                                    "description": "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.OneOf(\n\"Dynamic\",\n\"PerPacket\",\n)"
+                                                            }
+                                                        },
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "name": "sampling_interval_us",
+                                                "int64": {
+                                                    "computed_optional_required": "computed_optional",
+                                                    "default": {
+                                                        "static": 5
+                                                    },
+                                                    "description": "The sampling interval of interface state, in microseconds.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.Between(1, 255)"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ],
+                                        "description": "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric."
                                     }
                                 },
                                 {
@@ -1552,13 +1817,25 @@
                                                         "computed_optional_required": "required",
                                                         "element_type": {
                                                             "string": {}
-                                                        }
+                                                        },
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "listvalidator.SizeBetween(1, 1024)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
                                                     "name": "ipv6_pool",
                                                     "single_nested": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed_optional",
                                                         "attributes": [
                                                             {
                                                                 "name": "name",
@@ -1575,12 +1852,36 @@
                                                     "name": "name",
                                                     "string": {
                                                         "computed_optional_required": "required",
-                                                        "description": "Name of the IsolationGroup."
+                                                        "description": "Name of the IsolationGroup.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 }
                                             ]
                                         },
-                                        "description": "GPU Isolation Groups are used to isolate GPU traffic over the network, GPUs in different GPU isolation groups will not be able to communicate with each other.  If all GPUs across all stripes need to be able to communicate with each other, create a single GPUIsolationGroup selecting all GPU facing interfaces."
+                                        "description": "GPU Isolation Groups are used to isolate GPU traffic over the network, GPUs in different GPU isolation groups will not be able to communicate with each other.  If all GPUs across all stripes need to be able to communicate with each other, create a single GPUIsolationGroup selecting all GPU facing interfaces.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "listvalidator.SizeBetween(1, 1024)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 {
@@ -1590,7 +1891,7 @@
                                         "default": {
                                             "static": 4200
                                         },
-                                        "description": "IP MTU for this fabric. Default is 4136 bytes.",
+                                        "description": "IP MTU for this fabric.",
                                         "validators": [
                                             {
                                                 "custom": {
@@ -1608,7 +1909,7 @@
                                 {
                                     "name": "rocev2_qos",
                                     "single_nested": {
-                                        "computed_optional_required": "required",
+                                        "computed_optional_required": "computed_optional",
                                         "attributes": [
                                             {
                                                 "name": "ecn_max_drop_probability_percent",
@@ -1647,7 +1948,19 @@
                                                     "default": {
                                                         "static": 750
                                                     },
-                                                    "description": "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer."
+                                                    "description": "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.Between(100, 1500)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
@@ -1657,7 +1970,19 @@
                                                     "default": {
                                                         "static": 750
                                                     },
-                                                    "description": "Number of milliseconds during which the pfc-pause-frames will be ignored."
+                                                    "description": "Number of milliseconds during which the pfc-pause-frames will be ignored.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "int64validator.Between(100, 1500)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
@@ -1676,7 +2001,7 @@
                                                                         "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
                                                                     }
                                                                 ],
-                                                                "schema_definition": "int64validator.Between(0, 4294967295)"
+                                                                "schema_definition": "int64validator.Between(0, 268435456)"
                                                             }
                                                         }
                                                     ]
@@ -1689,13 +2014,25 @@
                                 {
                                     "name": "stripe_connector",
                                     "single_nested": {
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed_optional",
                                         "attributes": [
                                             {
                                                 "name": "asn_pool",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
-                                                    "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations."
+                                                    "computed_optional_required": "computed_optional",
+                                                    "description": "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
@@ -1705,14 +2042,38 @@
                                                     "element_type": {
                                                         "string": {}
                                                     },
-                                                    "description": "Selects TopoLinks to include in this AI Fabric, the selected TopoLinks will be used to create ISLs between the stripe connector devices and the leaf devices."
+                                                    "description": "Selects TopoLinks to include in this AI Fabric, the selected TopoLinks will be used to create ISLs between the stripe connector devices and the leaf devices.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "listvalidator.SizeBetween(1, 256)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
                                                 "name": "name",
                                                 "string": {
                                                     "computed_optional_required": "required",
-                                                    "description": "The name of the Stripe Connector."
+                                                    "description": "The name of the Stripe Connector.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
@@ -1722,14 +2083,38 @@
                                                     "element_type": {
                                                         "string": {}
                                                     },
-                                                    "description": "Node selector to select the nodes to be used for this stripe connector."
+                                                    "description": "Node selector to select the nodes to be used for this stripe connector.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "listvalidator.SizeBetween(1, 256)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
                                                 "name": "system_pool_ipv4",
                                                 "string": {
-                                                    "computed_optional_required": "optional",
-                                                    "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool."
+                                                    "computed_optional_required": "computed_optional",
+                                                    "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             }
                                         ],
@@ -1745,14 +2130,26 @@
                                                 {
                                                     "name": "asn_pool",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
-                                                        "description": "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange."
+                                                        "computed_optional_required": "computed_optional",
+                                                        "description": "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
                                                     "name": "gpu_vlan",
                                                     "int64": {
-                                                        "computed_optional_required": "optional",
+                                                        "computed_optional_required": "computed_optional",
                                                         "description": "The VLAN used on interfaces facing the GPU servers.",
                                                         "validators": [
                                                             {
@@ -1772,7 +2169,19 @@
                                                     "name": "name",
                                                     "string": {
                                                         "computed_optional_required": "required",
-                                                        "description": "The name of the Stripe."
+                                                        "description": "The name of the Stripe.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
@@ -1782,33 +2191,131 @@
                                                         "element_type": {
                                                             "string": {}
                                                         },
-                                                        "description": "Node selector to select the nodes to be used for this stripe."
+                                                        "description": "Node selector to select the nodes to be used for this stripe.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "listvalidator.SizeBetween(1, 256)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
                                                     "name": "stripe_id",
                                                     "int64": {
                                                         "computed_optional_required": "required",
-                                                        "description": "Unique ID for a stripe"
+                                                        "description": "Unique ID for a stripe",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "int64validator.Between(0, 256)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
                                                     "name": "system_pool_ipv4",
                                                     "string": {
-                                                        "computed_optional_required": "optional",
-                                                        "description": "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet."
+                                                        "computed_optional_required": "computed_optional",
+                                                        "description": "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 }
                                             ]
                                         },
-                                        "description": "A list of stripes, stripes contain a set of nodes (rails)."
+                                        "description": "A list of stripes, stripes contain a set of nodes (rails).",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "listvalidator.SizeBetween(1, 256)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 {
                                     "name": "system_pool_ipv4",
                                     "string": {
-                                        "computed_optional_required": "optional",
-                                        "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence."
+                                        "computed_optional_required": "computed_optional",
+                                        "description": "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "spec_type",
+                                    "single_nested": {
+                                        "computed_optional_required": "computed_optional",
+                                        "attributes": [
+                                            {
+                                                "name": "overlay",
+                                                "string": {
+                                                    "computed_optional_required": "required",
+                                                    "description": "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.OneOf(\n\"EVPN\",\n\"RouteLeaking\",\n)"
+                                                            }
+                                                        },
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ],
+                                        "description": "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN."
                                     }
                                 }
                             ],
@@ -1824,21 +2331,57 @@
                                     "name": "health",
                                     "int64": {
                                         "computed_optional_required": "computed_optional",
-                                        "description": "Indicates the health score of the Fabric.  The health score of the Fabric is determined by the aggregate health score of the resources emitted by the Fabric such as ISL, DefaultRouteReflectors etc."
+                                        "description": "Indicates the health score of the Fabric.  The health score of the Fabric is determined by the aggregate health score of the resources emitted by the Fabric such as ISL, DefaultRouteReflectors etc.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "int64validator.Between(0, 100)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 {
                                     "name": "health_score_reason",
                                     "string": {
                                         "computed_optional_required": "computed_optional",
-                                        "description": "Indicates the reason for the health score."
+                                        "description": "Indicates the reason for the health score.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.LengthBetween(1, 32768)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 {
                                     "name": "last_change_time",
                                     "string": {
                                         "computed_optional_required": "computed_optional",
-                                        "description": "The time when the state of the resource last changed."
+                                        "description": "The time when the state of the resource last changed.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 {
@@ -1856,6 +2399,16 @@
                                                     ],
                                                     "schema_definition": "stringvalidator.OneOf(\n\"Up\",\n\"Down\",\n\"Degraded\",\n\"Unknown\",\n)"
                                                 }
+                                            },
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                }
                                             }
                                         ]
                                     }
@@ -1869,7 +2422,19 @@
                                                 "name": "name",
                                                 "string": {
                                                     "computed_optional_required": "computed_optional",
-                                                    "description": "The name of the Stripe Connector."
+                                                    "description": "The name of the Stripe Connector.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             },
                                             {
@@ -1882,26 +2447,74 @@
                                                                 "name": "node",
                                                                 "string": {
                                                                     "computed_optional_required": "computed_optional",
-                                                                    "description": "Name of the TopoNode."
+                                                                    "description": "Name of the TopoNode.",
+                                                                    "validators": [
+                                                                        {
+                                                                            "custom": {
+                                                                                "imports": [
+                                                                                    {
+                                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                    }
+                                                                                ],
+                                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                            }
+                                                                        }
+                                                                    ]
                                                                 }
                                                             },
                                                             {
                                                                 "name": "operating_system",
                                                                 "string": {
                                                                     "computed_optional_required": "computed_optional",
-                                                                    "description": "Operating system running on the node."
+                                                                    "description": "Operating system running on the node.",
+                                                                    "validators": [
+                                                                        {
+                                                                            "custom": {
+                                                                                "imports": [
+                                                                                    {
+                                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                    }
+                                                                                ],
+                                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                            }
+                                                                        }
+                                                                    ]
                                                                 }
                                                             },
                                                             {
                                                                 "name": "operating_system_version",
                                                                 "string": {
                                                                     "computed_optional_required": "computed_optional",
-                                                                    "description": "Operating system version running on the node."
+                                                                    "description": "Operating system version running on the node.",
+                                                                    "validators": [
+                                                                        {
+                                                                            "custom": {
+                                                                                "imports": [
+                                                                                    {
+                                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                    }
+                                                                                ],
+                                                                                "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                            }
+                                                                        }
+                                                                    ]
                                                                 }
                                                             }
                                                         ]
                                                     },
-                                                    "description": "List of stripe connector nodes in the Stripe."
+                                                    "description": "List of stripe connector nodes in the Stripe.",
+                                                    "validators": [
+                                                        {
+                                                            "custom": {
+                                                                "imports": [
+                                                                    {
+                                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                    }
+                                                                ],
+                                                                "schema_definition": "listvalidator.SizeBetween(1, 1024)"
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             }
                                         ],
@@ -1924,38 +2537,110 @@
                                                                     "name": "node",
                                                                     "string": {
                                                                         "computed_optional_required": "computed_optional",
-                                                                        "description": "Name of the TopoNode."
+                                                                        "description": "Name of the TopoNode.",
+                                                                        "validators": [
+                                                                            {
+                                                                                "custom": {
+                                                                                    "imports": [
+                                                                                        {
+                                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                        }
+                                                                                    ],
+                                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                                }
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "operating_system",
                                                                     "string": {
                                                                         "computed_optional_required": "computed_optional",
-                                                                        "description": "Operating system running on the node."
+                                                                        "description": "Operating system running on the node.",
+                                                                        "validators": [
+                                                                            {
+                                                                                "custom": {
+                                                                                    "imports": [
+                                                                                        {
+                                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                        }
+                                                                                    ],
+                                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                                }
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 },
                                                                 {
                                                                     "name": "operating_system_version",
                                                                     "string": {
                                                                         "computed_optional_required": "computed_optional",
-                                                                        "description": "Operating system version running on the node."
+                                                                        "description": "Operating system version running on the node.",
+                                                                        "validators": [
+                                                                            {
+                                                                                "custom": {
+                                                                                    "imports": [
+                                                                                        {
+                                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                                        }
+                                                                                    ],
+                                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                                }
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 }
                                                             ]
                                                         },
-                                                        "description": "List of leaf nodes in the Stripe."
+                                                        "description": "List of leaf nodes in the Stripe.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "listvalidator.SizeBetween(1, 8192)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 {
                                                     "name": "name",
                                                     "string": {
                                                         "computed_optional_required": "computed_optional",
-                                                        "description": "The name of the Stripe."
+                                                        "description": "The name of the Stripe.",
+                                                        "validators": [
+                                                            {
+                                                                "custom": {
+                                                                    "imports": [
+                                                                        {
+                                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                                        }
+                                                                    ],
+                                                                    "schema_definition": "stringvalidator.LengthBetween(1, 253)"
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 }
                                             ]
                                         },
-                                        "description": "List of stripes in the Backend."
+                                        "description": "List of stripes in the Backend.",
+                                        "validators": [
+                                            {
+                                                "custom": {
+                                                    "imports": [
+                                                        {
+                                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                                        }
+                                                    ],
+                                                    "schema_definition": "listvalidator.SizeBetween(1, 256)"
+                                                }
+                                            }
+                                        ]
                                     }
                                 }
                             ],

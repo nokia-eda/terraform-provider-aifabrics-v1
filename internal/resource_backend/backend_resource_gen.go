@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -141,6 +142,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 												"Fabric",
 												"Stripe",
 											),
+											stringvalidator.LengthBetween(1, 253),
 										},
 										Default: stringdefault.StaticString("Global"),
 									},
@@ -154,6 +156,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 												"64",
 												"96",
 											),
+											stringvalidator.LengthBetween(1, 3),
 										},
 										Default: stringdefault.StaticString("64"),
 									},
@@ -164,6 +167,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 									},
 								},
 								Optional:            true,
+								Computed:            true,
 								Description:         "EDA managed IPv6 allocation configuration.",
 								MarkdownDescription: "EDA managed IPv6 allocation configuration.",
 							},
@@ -181,6 +185,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 									},
 								},
 								Optional:            true,
+								Computed:            true,
 								Description:         "Global IPv6 pool allocation configuration.",
 								MarkdownDescription: "Global IPv6 pool allocation configuration.",
 							},
@@ -195,6 +200,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 										"GlobalIPv6Pool",
 										"PerTenantIPv6Pool",
 									),
+									stringvalidator.LengthBetween(1, 253),
 								},
 								Default: stringdefault.StaticString("EDAManagedIPv6"),
 							},
@@ -205,13 +211,85 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
+						Computed:            true,
 						Description:         "Address allocation profile for GPU endpoints.",
 						MarkdownDescription: "Address allocation profile for GPU endpoints.",
 					},
 					"asn_pool": schema.StringAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol.",
 						MarkdownDescription: "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  Used when eBGP is configured as an underlay protocol.",
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 253),
+						},
+					},
+					"dynamic_load_balancing": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"flowset_size": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "The number of flowset entries reserved for each aggregate ECMP group.",
+								MarkdownDescription: "The number of flowset entries reserved for each aggregate ECMP group.",
+								Validators: []validator.Int64{
+									int64validator.OneOf(
+										256,
+										512,
+										1024,
+										2048,
+										4096,
+										8192,
+										16384,
+										32768,
+									),
+									int64validator.Between(256, 32768),
+								},
+								Default: int64default.StaticInt64(256),
+							},
+							"inactivity_timer_us": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "The flow inactivity timer in microseconds.",
+								MarkdownDescription: "The flow inactivity timer in microseconds.",
+								Validators: []validator.Int64{
+									int64validator.Between(1, 65535),
+								},
+								Default: int64default.StaticInt64(50),
+							},
+							"mode": schema.StringAttribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows.",
+								MarkdownDescription: "The dynamic load balancing mode. Dynamic mode means that flows will be dynamically assigned to the available interfaces based on the current load, including auto rebalancing of inactive flows.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Dynamic",
+										"PerPacket",
+									),
+									stringvalidator.LengthBetween(1, 253),
+								},
+								Default: stringdefault.StaticString("Dynamic"),
+							},
+							"sampling_interval_us": schema.Int64Attribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "The sampling interval of interface state, in microseconds.",
+								MarkdownDescription: "The sampling interval of interface state, in microseconds.",
+								Validators: []validator.Int64{
+									int64validator.Between(1, 255),
+								},
+								Default: int64default.StaticInt64(5),
+							},
+						},
+						CustomType: DynamicLoadBalancingType{
+							ObjectType: types.ObjectType{
+								AttrTypes: DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+							},
+						},
+						Optional:            true,
+						Computed:            true,
+						Description:         "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric.",
+						MarkdownDescription: "Dynamic Load Balancing configuration for the Backend. This configuration enables dynamic load balancing for the entire fabric.",
 					},
 					"gpu_isolation_groups": schema.ListNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
@@ -219,6 +297,9 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								"interface_selectors": schema.ListAttribute{
 									ElementType: types.StringType,
 									Required:    true,
+									Validators: []validator.List{
+										listvalidator.SizeBetween(1, 1024),
+									},
 								},
 								"ipv6_pool": schema.SingleNestedAttribute{
 									Attributes: map[string]schema.Attribute{
@@ -234,6 +315,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 										},
 									},
 									Optional:            true,
+									Computed:            true,
 									Description:         "IPv6 Pool reference for allocating IPv6 addresses to GPU facing interfaces in this IsolationGroup. Can be used only when `PerTenantIPv6Pool` address allocation type is selected in the Backend spec.",
 									MarkdownDescription: "IPv6 Pool reference for allocating IPv6 addresses to GPU facing interfaces in this IsolationGroup. Can be used only when `PerTenantIPv6Pool` address allocation type is selected in the Backend spec.",
 								},
@@ -241,6 +323,9 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 									Required:            true,
 									Description:         "Name of the IsolationGroup.",
 									MarkdownDescription: "Name of the IsolationGroup.",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 253),
+									},
 								},
 							},
 							CustomType: GpuIsolationGroupsType{
@@ -252,12 +337,15 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 						Required:            true,
 						Description:         "GPU Isolation Groups are used to isolate GPU traffic over the network, GPUs in different GPU isolation groups will not be able to communicate with each other.  If all GPUs across all stripes need to be able to communicate with each other, create a single GPUIsolationGroup selecting all GPU facing interfaces.",
 						MarkdownDescription: "GPU Isolation Groups are used to isolate GPU traffic over the network, GPUs in different GPU isolation groups will not be able to communicate with each other.  If all GPUs across all stripes need to be able to communicate with each other, create a single GPUIsolationGroup selecting all GPU facing interfaces.",
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 1024),
+						},
 					},
 					"ip_mtu": schema.Int64Attribute{
 						Optional:            true,
 						Computed:            true,
-						Description:         "IP MTU for this fabric. Default is 4136 bytes.",
-						MarkdownDescription: "IP MTU for this fabric. Default is 4136 bytes.",
+						Description:         "IP MTU for this fabric.",
+						MarkdownDescription: "IP MTU for this fabric.",
 						Validators: []validator.Int64{
 							int64validator.Between(1500, 9000),
 						},
@@ -291,14 +379,20 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								Computed:            true,
 								Description:         "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.",
 								MarkdownDescription: "Number of milliseconds during which outgoing interface is receiving pfc-pause-frames before triggering recovery-timer.",
-								Default:             int64default.StaticInt64(750),
+								Validators: []validator.Int64{
+									int64validator.Between(100, 1500),
+								},
+								Default: int64default.StaticInt64(750),
 							},
 							"pfc_deadlock_recovery_timer_ms": schema.Int64Attribute{
 								Optional:            true,
 								Computed:            true,
 								Description:         "Number of milliseconds during which the pfc-pause-frames will be ignored.",
 								MarkdownDescription: "Number of milliseconds during which the pfc-pause-frames will be ignored.",
-								Default:             int64default.StaticInt64(750),
+								Validators: []validator.Int64{
+									int64validator.Between(100, 1500),
+								},
+								Default: int64default.StaticInt64(750),
 							},
 							"queue_maximum_burst_size_bytes": schema.Int64Attribute{
 								Optional:            true,
@@ -306,7 +400,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								Description:         "Maximum amount of shared buffer memory available to the queue in bytes.",
 								MarkdownDescription: "Maximum amount of shared buffer memory available to the queue in bytes.",
 								Validators: []validator.Int64{
-									int64validator.Between(0, 4294967295),
+									int64validator.Between(0, 268435456),
 								},
 								Default: int64default.StaticInt64(1024000),
 							},
@@ -316,38 +410,81 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								AttrTypes: Rocev2QosValue{}.AttributeTypes(ctx),
 							},
 						},
-						Required:            true,
+						Optional:            true,
+						Computed:            true,
 						Description:         "Set of properties to configure the RoCEv2 QoS.",
 						MarkdownDescription: "Set of properties to configure the RoCEv2 QoS.",
+					},
+					"type": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"overlay": schema.StringAttribute{
+								Required:            true,
+								Description:         "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).",
+								MarkdownDescription: "Overlay type for the AI Fabric. Route Leaking does not use any encapsulation of the overlay traffic. EVPN uses VXLAN with EVPN-IFL control plane (IFL).",
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"EVPN",
+										"RouteLeaking",
+									),
+									stringvalidator.LengthBetween(1, 253),
+								},
+							},
+						},
+						CustomType: SpecTypeType{
+							ObjectType: types.ObjectType{
+								AttrTypes: SpecTypeValue{}.AttributeTypes(ctx),
+							},
+						},
+						Optional:            true,
+						Computed:            true,
+						Description:         "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN.",
+						MarkdownDescription: "Type of the Backend to configure, can be used to select non-default types such as EVPN-VXLAN.",
 					},
 					"stripe_connector": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"asn_pool": schema.StringAttribute{
 								Optional:            true,
+								Computed:            true,
 								Description:         "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.",
 								MarkdownDescription: "Reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.",
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(1, 253),
+								},
 							},
 							"link_selectors": schema.ListAttribute{
 								ElementType:         types.StringType,
 								Required:            true,
 								Description:         "Selects TopoLinks to include in this AI Fabric, the selected TopoLinks will be used to create ISLs between the stripe connector devices and the leaf devices.",
 								MarkdownDescription: "Selects TopoLinks to include in this AI Fabric, the selected TopoLinks will be used to create ISLs between the stripe connector devices and the leaf devices.",
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 256),
+								},
 							},
 							"name": schema.StringAttribute{
 								Required:            true,
 								Description:         "The name of the Stripe Connector.",
 								MarkdownDescription: "The name of the Stripe Connector.",
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(1, 253),
+								},
 							},
 							"node_selectors": schema.ListAttribute{
 								ElementType:         types.StringType,
 								Required:            true,
 								Description:         "Node selector to select the nodes to be used for this stripe connector.",
 								MarkdownDescription: "Node selector to select the nodes to be used for this stripe connector.",
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 256),
+								},
 							},
 							"system_pool_ipv4": schema.StringAttribute{
 								Optional:            true,
+								Computed:            true,
 								Description:         "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool.",
 								MarkdownDescription: "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces for the stripe connector devices.  If not specified, the system will use the default IPAllocationPool.",
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(1, 253),
+								},
 							},
 						},
 						CustomType: StripeConnectorType{
@@ -356,6 +493,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
+						Computed:            true,
 						Description:         "StripeConnector is the spine layer interconnecting multiple stripes.",
 						MarkdownDescription: "StripeConnector is the spine layer interconnecting multiple stripes.",
 					},
@@ -364,11 +502,16 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 							Attributes: map[string]schema.Attribute{
 								"asn_pool": schema.StringAttribute{
 									Optional:            true,
+									Computed:            true,
 									Description:         "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange.",
 									MarkdownDescription: "Optional reference to an IndexAllocationPool pool to use for Autonomous System Number allocations.  If left blank, ASN allocation will be done from the ASNAllocationRange.",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 253),
+									},
 								},
 								"gpu_vlan": schema.Int64Attribute{
 									Optional:            true,
+									Computed:            true,
 									Description:         "The VLAN used on interfaces facing the GPU servers.",
 									MarkdownDescription: "The VLAN used on interfaces facing the GPU servers.",
 									Validators: []validator.Int64{
@@ -379,22 +522,35 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 									Required:            true,
 									Description:         "The name of the Stripe.",
 									MarkdownDescription: "The name of the Stripe.",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 253),
+									},
 								},
 								"node_selectors": schema.ListAttribute{
 									ElementType:         types.StringType,
 									Required:            true,
 									Description:         "Node selector to select the nodes to be used for this stripe.",
 									MarkdownDescription: "Node selector to select the nodes to be used for this stripe.",
+									Validators: []validator.List{
+										listvalidator.SizeBetween(1, 256),
+									},
 								},
 								"stripe_id": schema.Int64Attribute{
 									Required:            true,
 									Description:         "Unique ID for a stripe",
 									MarkdownDescription: "Unique ID for a stripe",
+									Validators: []validator.Int64{
+										int64validator.Between(0, 256),
+									},
 								},
 								"system_pool_ipv4": schema.StringAttribute{
 									Optional:            true,
+									Computed:            true,
 									Description:         "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet.",
 									MarkdownDescription: "Optional reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces. If left blank, system IP allocation will be done from the SystemIPV4Subnet.",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 253),
+									},
 								},
 							},
 							CustomType: StripesType{
@@ -406,11 +562,18 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 						Required:            true,
 						Description:         "A list of stripes, stripes contain a set of nodes (rails).",
 						MarkdownDescription: "A list of stripes, stripes contain a set of nodes (rails).",
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 256),
+						},
 					},
 					"system_pool_ipv4": schema.StringAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence.",
 						MarkdownDescription: "Reference to an IPAllocationPool used to dynamically allocate an IPv4 address to system/lo0 interfaces.  If specified under the Leaf/Spine/Superspine/Borderleaf those will take precedence.",
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 253),
+						},
 					},
 				},
 				CustomType: SpecType{
@@ -429,18 +592,27 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						Description:         "Indicates the health score of the Fabric.  The health score of the Fabric is determined by the aggregate health score of the resources emitted by the Fabric such as ISL, DefaultRouteReflectors etc.",
 						MarkdownDescription: "Indicates the health score of the Fabric.  The health score of the Fabric is determined by the aggregate health score of the resources emitted by the Fabric such as ISL, DefaultRouteReflectors etc.",
+						Validators: []validator.Int64{
+							int64validator.Between(0, 100),
+						},
 					},
 					"health_score_reason": schema.StringAttribute{
 						Optional:            true,
 						Computed:            true,
 						Description:         "Indicates the reason for the health score.",
 						MarkdownDescription: "Indicates the reason for the health score.",
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 32768),
+						},
 					},
 					"last_change_time": schema.StringAttribute{
 						Optional:            true,
 						Computed:            true,
 						Description:         "The time when the state of the resource last changed.",
 						MarkdownDescription: "The time when the state of the resource last changed.",
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 253),
+						},
 					},
 					"operational_state": schema.StringAttribute{
 						Optional:            true,
@@ -454,6 +626,7 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								"Degraded",
 								"Unknown",
 							),
+							stringvalidator.LengthBetween(1, 253),
 						},
 					},
 					"stripe_connector": schema.SingleNestedAttribute{
@@ -463,6 +636,9 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								Computed:            true,
 								Description:         "The name of the Stripe Connector.",
 								MarkdownDescription: "The name of the Stripe Connector.",
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(1, 253),
+								},
 							},
 							"stripe_connector_nodes": schema.ListNestedAttribute{
 								NestedObject: schema.NestedAttributeObject{
@@ -472,18 +648,27 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 											Computed:            true,
 											Description:         "Name of the TopoNode.",
 											MarkdownDescription: "Name of the TopoNode.",
+											Validators: []validator.String{
+												stringvalidator.LengthBetween(1, 253),
+											},
 										},
 										"operating_system": schema.StringAttribute{
 											Optional:            true,
 											Computed:            true,
 											Description:         "Operating system running on the node.",
 											MarkdownDescription: "Operating system running on the node.",
+											Validators: []validator.String{
+												stringvalidator.LengthBetween(1, 253),
+											},
 										},
 										"operating_system_version": schema.StringAttribute{
 											Optional:            true,
 											Computed:            true,
 											Description:         "Operating system version running on the node.",
 											MarkdownDescription: "Operating system version running on the node.",
+											Validators: []validator.String{
+												stringvalidator.LengthBetween(1, 253),
+											},
 										},
 									},
 									CustomType: StripeConnectorNodesType{
@@ -496,6 +681,9 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 								Computed:            true,
 								Description:         "List of stripe connector nodes in the Stripe.",
 								MarkdownDescription: "List of stripe connector nodes in the Stripe.",
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 1024),
+								},
 							},
 						},
 						CustomType: StripeConnector1Type{
@@ -519,18 +707,27 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 												Computed:            true,
 												Description:         "Name of the TopoNode.",
 												MarkdownDescription: "Name of the TopoNode.",
+												Validators: []validator.String{
+													stringvalidator.LengthBetween(1, 253),
+												},
 											},
 											"operating_system": schema.StringAttribute{
 												Optional:            true,
 												Computed:            true,
 												Description:         "Operating system running on the node.",
 												MarkdownDescription: "Operating system running on the node.",
+												Validators: []validator.String{
+													stringvalidator.LengthBetween(1, 253),
+												},
 											},
 											"operating_system_version": schema.StringAttribute{
 												Optional:            true,
 												Computed:            true,
 												Description:         "Operating system version running on the node.",
 												MarkdownDescription: "Operating system version running on the node.",
+												Validators: []validator.String{
+													stringvalidator.LengthBetween(1, 253),
+												},
 											},
 										},
 										CustomType: LeafNodesType{
@@ -543,12 +740,18 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 									Computed:            true,
 									Description:         "List of leaf nodes in the Stripe.",
 									MarkdownDescription: "List of leaf nodes in the Stripe.",
+									Validators: []validator.List{
+										listvalidator.SizeBetween(1, 8192),
+									},
 								},
 								"name": schema.StringAttribute{
 									Optional:            true,
 									Computed:            true,
 									Description:         "The name of the Stripe.",
 									MarkdownDescription: "The name of the Stripe.",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 253),
+									},
 								},
 							},
 							CustomType: Stripes1Type{
@@ -561,6 +764,9 @@ func BackendResourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						Description:         "List of stripes in the Backend.",
 						MarkdownDescription: "List of stripes in the Backend.",
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 256),
+						},
 					},
 				},
 				CustomType: StatusType{
@@ -2014,6 +2220,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`asn_pool expected to be basetypes.StringValue, was: %T`, asnPoolAttribute))
 	}
 
+	dynamicLoadBalancingAttribute, ok := attributes["dynamic_load_balancing"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`dynamic_load_balancing is missing from object`)
+
+		return nil, diags
+	}
+
+	dynamicLoadBalancingVal, ok := dynamicLoadBalancingAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`dynamic_load_balancing expected to be basetypes.ObjectValue, was: %T`, dynamicLoadBalancingAttribute))
+	}
+
 	gpuIsolationGroupsAttribute, ok := attributes["gpu_isolation_groups"]
 
 	if !ok {
@@ -2066,6 +2290,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`rocev2_qos expected to be basetypes.ObjectValue, was: %T`, rocev2QosAttribute))
+	}
+
+	specTypeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`spec_type is missing from object`)
+
+		return nil, diags
+	}
+
+	specTypeVal, ok := specTypeAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`spec_type expected to be basetypes.ObjectValue, was: %T`, specTypeAttribute))
 	}
 
 	stripeConnectorAttribute, ok := attributes["stripe_connector"]
@@ -2127,15 +2369,17 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	}
 
 	return SpecValue{
-		AddressAllocation:  addressAllocationVal,
-		AsnPool:            asnPoolVal,
-		GpuIsolationGroups: gpuIsolationGroupsVal,
-		IpMtu:              ipMtuVal,
-		Rocev2Qos:          rocev2QosVal,
-		StripeConnector:    stripeConnectorVal,
-		Stripes:            stripesVal,
-		SystemPoolIpv4:     systemPoolIpv4Val,
-		state:              attr.ValueStateKnown,
+		AddressAllocation:    addressAllocationVal,
+		AsnPool:              asnPoolVal,
+		DynamicLoadBalancing: dynamicLoadBalancingVal,
+		GpuIsolationGroups:   gpuIsolationGroupsVal,
+		IpMtu:                ipMtuVal,
+		Rocev2Qos:            rocev2QosVal,
+		SpecType:             specTypeVal,
+		StripeConnector:      stripeConnectorVal,
+		Stripes:              stripesVal,
+		SystemPoolIpv4:       systemPoolIpv4Val,
+		state:                attr.ValueStateKnown,
 	}, diags
 }
 
@@ -2238,6 +2482,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`asn_pool expected to be basetypes.StringValue, was: %T`, asnPoolAttribute))
 	}
 
+	dynamicLoadBalancingAttribute, ok := attributes["dynamic_load_balancing"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`dynamic_load_balancing is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	dynamicLoadBalancingVal, ok := dynamicLoadBalancingAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`dynamic_load_balancing expected to be basetypes.ObjectValue, was: %T`, dynamicLoadBalancingAttribute))
+	}
+
 	gpuIsolationGroupsAttribute, ok := attributes["gpu_isolation_groups"]
 
 	if !ok {
@@ -2290,6 +2552,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		diags.AddError(
 			"Attribute Wrong Type",
 			fmt.Sprintf(`rocev2_qos expected to be basetypes.ObjectValue, was: %T`, rocev2QosAttribute))
+	}
+
+	specTypeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`spec_type is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	specTypeVal, ok := specTypeAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`spec_type expected to be basetypes.ObjectValue, was: %T`, specTypeAttribute))
 	}
 
 	stripeConnectorAttribute, ok := attributes["stripe_connector"]
@@ -2351,15 +2631,17 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	}
 
 	return SpecValue{
-		AddressAllocation:  addressAllocationVal,
-		AsnPool:            asnPoolVal,
-		GpuIsolationGroups: gpuIsolationGroupsVal,
-		IpMtu:              ipMtuVal,
-		Rocev2Qos:          rocev2QosVal,
-		StripeConnector:    stripeConnectorVal,
-		Stripes:            stripesVal,
-		SystemPoolIpv4:     systemPoolIpv4Val,
-		state:              attr.ValueStateKnown,
+		AddressAllocation:    addressAllocationVal,
+		AsnPool:              asnPoolVal,
+		DynamicLoadBalancing: dynamicLoadBalancingVal,
+		GpuIsolationGroups:   gpuIsolationGroupsVal,
+		IpMtu:                ipMtuVal,
+		Rocev2Qos:            rocev2QosVal,
+		SpecType:             specTypeVal,
+		StripeConnector:      stripeConnectorVal,
+		Stripes:              stripesVal,
+		SystemPoolIpv4:       systemPoolIpv4Val,
+		state:                attr.ValueStateKnown,
 	}, diags
 }
 
@@ -2431,19 +2713,21 @@ func (t SpecType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
-	AddressAllocation  basetypes.ObjectValue `tfsdk:"address_allocation"`
-	AsnPool            basetypes.StringValue `tfsdk:"asn_pool"`
-	GpuIsolationGroups basetypes.ListValue   `tfsdk:"gpu_isolation_groups"`
-	IpMtu              basetypes.Int64Value  `tfsdk:"ip_mtu"`
-	Rocev2Qos          basetypes.ObjectValue `tfsdk:"rocev2_qos"`
-	StripeConnector    basetypes.ObjectValue `tfsdk:"stripe_connector"`
-	Stripes            basetypes.ListValue   `tfsdk:"stripes"`
-	SystemPoolIpv4     basetypes.StringValue `tfsdk:"system_pool_ipv4"`
-	state              attr.ValueState
+	AddressAllocation    basetypes.ObjectValue `tfsdk:"address_allocation"`
+	AsnPool              basetypes.StringValue `tfsdk:"asn_pool"`
+	DynamicLoadBalancing basetypes.ObjectValue `tfsdk:"dynamic_load_balancing"`
+	GpuIsolationGroups   basetypes.ListValue   `tfsdk:"gpu_isolation_groups"`
+	IpMtu                basetypes.Int64Value  `tfsdk:"ip_mtu"`
+	Rocev2Qos            basetypes.ObjectValue `tfsdk:"rocev2_qos"`
+	SpecType             basetypes.ObjectValue `tfsdk:"type"`
+	StripeConnector      basetypes.ObjectValue `tfsdk:"stripe_connector"`
+	Stripes              basetypes.ListValue   `tfsdk:"stripes"`
+	SystemPoolIpv4       basetypes.StringValue `tfsdk:"system_pool_ipv4"`
+	state                attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 8)
+	attrTypes := make(map[string]tftypes.Type, 10)
 
 	var val tftypes.Value
 	var err error
@@ -2452,12 +2736,18 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		AttrTypes: AddressAllocationValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
 	attrTypes["asn_pool"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["dynamic_load_balancing"] = basetypes.ObjectType{
+		AttrTypes: DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 	attrTypes["gpu_isolation_groups"] = basetypes.ListType{
 		ElemType: GpuIsolationGroupsValue{}.Type(ctx),
 	}.TerraformType(ctx)
 	attrTypes["ip_mtu"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["rocev2_qos"] = basetypes.ObjectType{
 		AttrTypes: Rocev2QosValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["type"] = basetypes.ObjectType{
+		AttrTypes: SpecTypeValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
 	attrTypes["stripe_connector"] = basetypes.ObjectType{
 		AttrTypes: StripeConnectorValue{}.AttributeTypes(ctx),
@@ -2471,7 +2761,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 8)
+		vals := make(map[string]tftypes.Value, 10)
 
 		val, err = v.AddressAllocation.ToTerraformValue(ctx)
 
@@ -2488,6 +2778,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["asn_pool"] = val
+
+		val, err = v.DynamicLoadBalancing.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["dynamic_load_balancing"] = val
 
 		val, err = v.GpuIsolationGroups.ToTerraformValue(ctx)
 
@@ -2512,6 +2810,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["rocev2_qos"] = val
+
+		val, err = v.SpecType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["type"] = val
 
 		val, err = v.StripeConnector.ToTerraformValue(ctx)
 
@@ -2587,6 +2893,27 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	var dynamicLoadBalancing basetypes.ObjectValue
+
+	if v.DynamicLoadBalancing.IsNull() {
+		dynamicLoadBalancing = types.ObjectNull(
+			DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.DynamicLoadBalancing.IsUnknown() {
+		dynamicLoadBalancing = types.ObjectUnknown(
+			DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.DynamicLoadBalancing.IsNull() && !v.DynamicLoadBalancing.IsUnknown() {
+		dynamicLoadBalancing = types.ObjectValueMust(
+			DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+			v.DynamicLoadBalancing.Attributes(),
+		)
+	}
+
 	gpuIsolationGroups := types.ListValueMust(
 		GpuIsolationGroupsType{
 			basetypes.ObjectType{
@@ -2634,6 +2961,27 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		rocev2Qos = types.ObjectValueMust(
 			Rocev2QosValue{}.AttributeTypes(ctx),
 			v.Rocev2Qos.Attributes(),
+		)
+	}
+
+	var specType basetypes.ObjectValue
+
+	if v.SpecType.IsNull() {
+		specType = types.ObjectNull(
+			SpecTypeValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.SpecType.IsUnknown() {
+		specType = types.ObjectUnknown(
+			SpecTypeValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SpecType.IsNull() && !v.SpecType.IsUnknown() {
+		specType = types.ObjectValueMust(
+			SpecTypeValue{}.AttributeTypes(ctx),
+			v.SpecType.Attributes(),
 		)
 	}
 
@@ -2692,12 +3040,18 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			AttrTypes: AddressAllocationValue{}.AttributeTypes(ctx),
 		},
 		"asn_pool": basetypes.StringType{},
+		"dynamic_load_balancing": basetypes.ObjectType{
+			AttrTypes: DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+		},
 		"gpu_isolation_groups": basetypes.ListType{
 			ElemType: GpuIsolationGroupsValue{}.Type(ctx),
 		},
 		"ip_mtu": basetypes.Int64Type{},
 		"rocev2_qos": basetypes.ObjectType{
 			AttrTypes: Rocev2QosValue{}.AttributeTypes(ctx),
+		},
+		"type": basetypes.ObjectType{
+			AttrTypes: SpecTypeValue{}.AttributeTypes(ctx),
 		},
 		"stripe_connector": basetypes.ObjectType{
 			AttrTypes: StripeConnectorValue{}.AttributeTypes(ctx),
@@ -2719,14 +3073,16 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"address_allocation":   addressAllocation,
-			"asn_pool":             v.AsnPool,
-			"gpu_isolation_groups": gpuIsolationGroups,
-			"ip_mtu":               v.IpMtu,
-			"rocev2_qos":           rocev2Qos,
-			"stripe_connector":     stripeConnector,
-			"stripes":              stripes,
-			"system_pool_ipv4":     v.SystemPoolIpv4,
+			"address_allocation":     addressAllocation,
+			"asn_pool":               v.AsnPool,
+			"dynamic_load_balancing": dynamicLoadBalancing,
+			"gpu_isolation_groups":   gpuIsolationGroups,
+			"ip_mtu":                 v.IpMtu,
+			"rocev2_qos":             rocev2Qos,
+			"type":                   specType,
+			"stripe_connector":       stripeConnector,
+			"stripes":                stripes,
+			"system_pool_ipv4":       v.SystemPoolIpv4,
 		})
 
 	return objVal, diags
@@ -2755,6 +3111,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.DynamicLoadBalancing.Equal(other.DynamicLoadBalancing) {
+		return false
+	}
+
 	if !v.GpuIsolationGroups.Equal(other.GpuIsolationGroups) {
 		return false
 	}
@@ -2764,6 +3124,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.Rocev2Qos.Equal(other.Rocev2Qos) {
+		return false
+	}
+
+	if !v.SpecType.Equal(other.SpecType) {
 		return false
 	}
 
@@ -2796,12 +3160,18 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 			AttrTypes: AddressAllocationValue{}.AttributeTypes(ctx),
 		},
 		"asn_pool": basetypes.StringType{},
+		"dynamic_load_balancing": basetypes.ObjectType{
+			AttrTypes: DynamicLoadBalancingValue{}.AttributeTypes(ctx),
+		},
 		"gpu_isolation_groups": basetypes.ListType{
 			ElemType: GpuIsolationGroupsValue{}.Type(ctx),
 		},
 		"ip_mtu": basetypes.Int64Type{},
 		"rocev2_qos": basetypes.ObjectType{
 			AttrTypes: Rocev2QosValue{}.AttributeTypes(ctx),
+		},
+		"type": basetypes.ObjectType{
+			AttrTypes: SpecTypeValue{}.AttributeTypes(ctx),
 		},
 		"stripe_connector": basetypes.ObjectType{
 			AttrTypes: StripeConnectorValue{}.AttributeTypes(ctx),
@@ -4001,6 +4371,495 @@ func (v GlobalIpv6PoolValue) Type(ctx context.Context) attr.Type {
 func (v GlobalIpv6PoolValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"name": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = DynamicLoadBalancingType{}
+
+type DynamicLoadBalancingType struct {
+	basetypes.ObjectType
+}
+
+func (t DynamicLoadBalancingType) Equal(o attr.Type) bool {
+	other, ok := o.(DynamicLoadBalancingType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t DynamicLoadBalancingType) String() string {
+	return "DynamicLoadBalancingType"
+}
+
+func (t DynamicLoadBalancingType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	flowsetSizeAttribute, ok := attributes["flowset_size"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`flowset_size is missing from object`)
+
+		return nil, diags
+	}
+
+	flowsetSizeVal, ok := flowsetSizeAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`flowset_size expected to be basetypes.Int64Value, was: %T`, flowsetSizeAttribute))
+	}
+
+	inactivityTimerUsAttribute, ok := attributes["inactivity_timer_us"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`inactivity_timer_us is missing from object`)
+
+		return nil, diags
+	}
+
+	inactivityTimerUsVal, ok := inactivityTimerUsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`inactivity_timer_us expected to be basetypes.Int64Value, was: %T`, inactivityTimerUsAttribute))
+	}
+
+	modeAttribute, ok := attributes["mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`mode is missing from object`)
+
+		return nil, diags
+	}
+
+	modeVal, ok := modeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`mode expected to be basetypes.StringValue, was: %T`, modeAttribute))
+	}
+
+	samplingIntervalUsAttribute, ok := attributes["sampling_interval_us"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`sampling_interval_us is missing from object`)
+
+		return nil, diags
+	}
+
+	samplingIntervalUsVal, ok := samplingIntervalUsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`sampling_interval_us expected to be basetypes.Int64Value, was: %T`, samplingIntervalUsAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return DynamicLoadBalancingValue{
+		FlowsetSize:        flowsetSizeVal,
+		InactivityTimerUs:  inactivityTimerUsVal,
+		Mode:               modeVal,
+		SamplingIntervalUs: samplingIntervalUsVal,
+		state:              attr.ValueStateKnown,
+	}, diags
+}
+
+func NewDynamicLoadBalancingValueNull() DynamicLoadBalancingValue {
+	return DynamicLoadBalancingValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewDynamicLoadBalancingValueUnknown() DynamicLoadBalancingValue {
+	return DynamicLoadBalancingValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewDynamicLoadBalancingValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (DynamicLoadBalancingValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing DynamicLoadBalancingValue Attribute Value",
+				"While creating a DynamicLoadBalancingValue value, a missing attribute value was detected. "+
+					"A DynamicLoadBalancingValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("DynamicLoadBalancingValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid DynamicLoadBalancingValue Attribute Type",
+				"While creating a DynamicLoadBalancingValue value, an invalid attribute value was detected. "+
+					"A DynamicLoadBalancingValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("DynamicLoadBalancingValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("DynamicLoadBalancingValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra DynamicLoadBalancingValue Attribute Value",
+				"While creating a DynamicLoadBalancingValue value, an extra attribute value was detected. "+
+					"A DynamicLoadBalancingValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra DynamicLoadBalancingValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	flowsetSizeAttribute, ok := attributes["flowset_size"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`flowset_size is missing from object`)
+
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	flowsetSizeVal, ok := flowsetSizeAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`flowset_size expected to be basetypes.Int64Value, was: %T`, flowsetSizeAttribute))
+	}
+
+	inactivityTimerUsAttribute, ok := attributes["inactivity_timer_us"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`inactivity_timer_us is missing from object`)
+
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	inactivityTimerUsVal, ok := inactivityTimerUsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`inactivity_timer_us expected to be basetypes.Int64Value, was: %T`, inactivityTimerUsAttribute))
+	}
+
+	modeAttribute, ok := attributes["mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`mode is missing from object`)
+
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	modeVal, ok := modeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`mode expected to be basetypes.StringValue, was: %T`, modeAttribute))
+	}
+
+	samplingIntervalUsAttribute, ok := attributes["sampling_interval_us"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`sampling_interval_us is missing from object`)
+
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	samplingIntervalUsVal, ok := samplingIntervalUsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`sampling_interval_us expected to be basetypes.Int64Value, was: %T`, samplingIntervalUsAttribute))
+	}
+
+	if diags.HasError() {
+		return NewDynamicLoadBalancingValueUnknown(), diags
+	}
+
+	return DynamicLoadBalancingValue{
+		FlowsetSize:        flowsetSizeVal,
+		InactivityTimerUs:  inactivityTimerUsVal,
+		Mode:               modeVal,
+		SamplingIntervalUs: samplingIntervalUsVal,
+		state:              attr.ValueStateKnown,
+	}, diags
+}
+
+func NewDynamicLoadBalancingValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) DynamicLoadBalancingValue {
+	object, diags := NewDynamicLoadBalancingValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewDynamicLoadBalancingValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t DynamicLoadBalancingType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewDynamicLoadBalancingValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewDynamicLoadBalancingValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewDynamicLoadBalancingValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewDynamicLoadBalancingValueMust(DynamicLoadBalancingValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t DynamicLoadBalancingType) ValueType(ctx context.Context) attr.Value {
+	return DynamicLoadBalancingValue{}
+}
+
+var _ basetypes.ObjectValuable = DynamicLoadBalancingValue{}
+
+type DynamicLoadBalancingValue struct {
+	FlowsetSize        basetypes.Int64Value  `tfsdk:"flowset_size"`
+	InactivityTimerUs  basetypes.Int64Value  `tfsdk:"inactivity_timer_us"`
+	Mode               basetypes.StringValue `tfsdk:"mode"`
+	SamplingIntervalUs basetypes.Int64Value  `tfsdk:"sampling_interval_us"`
+	state              attr.ValueState
+}
+
+func (v DynamicLoadBalancingValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["flowset_size"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["inactivity_timer_us"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["mode"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["sampling_interval_us"] = basetypes.Int64Type{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.FlowsetSize.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["flowset_size"] = val
+
+		val, err = v.InactivityTimerUs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["inactivity_timer_us"] = val
+
+		val, err = v.Mode.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["mode"] = val
+
+		val, err = v.SamplingIntervalUs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["sampling_interval_us"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v DynamicLoadBalancingValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v DynamicLoadBalancingValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v DynamicLoadBalancingValue) String() string {
+	return "DynamicLoadBalancingValue"
+}
+
+func (v DynamicLoadBalancingValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"flowset_size":         basetypes.Int64Type{},
+		"inactivity_timer_us":  basetypes.Int64Type{},
+		"mode":                 basetypes.StringType{},
+		"sampling_interval_us": basetypes.Int64Type{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"flowset_size":         v.FlowsetSize,
+			"inactivity_timer_us":  v.InactivityTimerUs,
+			"mode":                 v.Mode,
+			"sampling_interval_us": v.SamplingIntervalUs,
+		})
+
+	return objVal, diags
+}
+
+func (v DynamicLoadBalancingValue) Equal(o attr.Value) bool {
+	other, ok := o.(DynamicLoadBalancingValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.FlowsetSize.Equal(other.FlowsetSize) {
+		return false
+	}
+
+	if !v.InactivityTimerUs.Equal(other.InactivityTimerUs) {
+		return false
+	}
+
+	if !v.Mode.Equal(other.Mode) {
+		return false
+	}
+
+	if !v.SamplingIntervalUs.Equal(other.SamplingIntervalUs) {
+		return false
+	}
+
+	return true
+}
+
+func (v DynamicLoadBalancingValue) Type(ctx context.Context) attr.Type {
+	return DynamicLoadBalancingType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v DynamicLoadBalancingValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"flowset_size":         basetypes.Int64Type{},
+		"inactivity_timer_us":  basetypes.Int64Type{},
+		"mode":                 basetypes.StringType{},
+		"sampling_interval_us": basetypes.Int64Type{},
 	}
 }
 
@@ -5415,6 +6274,330 @@ func (v Rocev2QosValue) AttributeTypes(ctx context.Context) map[string]attr.Type
 		"pfc_deadlock_detection_timer_ms":  basetypes.Int64Type{},
 		"pfc_deadlock_recovery_timer_ms":   basetypes.Int64Type{},
 		"queue_maximum_burst_size_bytes":   basetypes.Int64Type{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SpecTypeType{}
+
+type SpecTypeType struct {
+	basetypes.ObjectType
+}
+
+func (t SpecTypeType) Equal(o attr.Type) bool {
+	other, ok := o.(SpecTypeType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SpecTypeType) String() string {
+	return "SpecTypeType"
+}
+
+func (t SpecTypeType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	overlayAttribute, ok := attributes["overlay"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`overlay is missing from object`)
+
+		return nil, diags
+	}
+
+	overlayVal, ok := overlayAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`overlay expected to be basetypes.StringValue, was: %T`, overlayAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SpecTypeValue{
+		Overlay: overlayVal,
+		state:   attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSpecTypeValueNull() SpecTypeValue {
+	return SpecTypeValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSpecTypeValueUnknown() SpecTypeValue {
+	return SpecTypeValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSpecTypeValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SpecTypeValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SpecTypeValue Attribute Value",
+				"While creating a SpecTypeValue value, a missing attribute value was detected. "+
+					"A SpecTypeValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SpecTypeValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SpecTypeValue Attribute Type",
+				"While creating a SpecTypeValue value, an invalid attribute value was detected. "+
+					"A SpecTypeValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SpecTypeValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SpecTypeValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SpecTypeValue Attribute Value",
+				"While creating a SpecTypeValue value, an extra attribute value was detected. "+
+					"A SpecTypeValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SpecTypeValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSpecTypeValueUnknown(), diags
+	}
+
+	overlayAttribute, ok := attributes["overlay"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`overlay is missing from object`)
+
+		return NewSpecTypeValueUnknown(), diags
+	}
+
+	overlayVal, ok := overlayAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`overlay expected to be basetypes.StringValue, was: %T`, overlayAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSpecTypeValueUnknown(), diags
+	}
+
+	return SpecTypeValue{
+		Overlay: overlayVal,
+		state:   attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSpecTypeValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SpecTypeValue {
+	object, diags := NewSpecTypeValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSpecTypeValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SpecTypeType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSpecTypeValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSpecTypeValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSpecTypeValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSpecTypeValueMust(SpecTypeValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SpecTypeType) ValueType(ctx context.Context) attr.Value {
+	return SpecTypeValue{}
+}
+
+var _ basetypes.ObjectValuable = SpecTypeValue{}
+
+type SpecTypeValue struct {
+	Overlay basetypes.StringValue `tfsdk:"overlay"`
+	state   attr.ValueState
+}
+
+func (v SpecTypeValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["overlay"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Overlay.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["overlay"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SpecTypeValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SpecTypeValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SpecTypeValue) String() string {
+	return "SpecTypeValue"
+}
+
+func (v SpecTypeValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"overlay": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"overlay": v.Overlay,
+		})
+
+	return objVal, diags
+}
+
+func (v SpecTypeValue) Equal(o attr.Value) bool {
+	other, ok := o.(SpecTypeValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Overlay.Equal(other.Overlay) {
+		return false
+	}
+
+	return true
+}
+
+func (v SpecTypeValue) Type(ctx context.Context) attr.Type {
+	return SpecTypeType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SpecTypeValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"overlay": basetypes.StringType{},
 	}
 }
 
